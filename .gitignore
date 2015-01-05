@@ -9,3 +9,4 @@
 /test/version_tmp/
 /tmp/
 *.DS_Store
+/Gemfile.lock
