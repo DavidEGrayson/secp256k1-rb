@@ -1,37 +1,38 @@
 [![Build Status](https://travis-ci.org/GemHQ/secp256k1-rb.png)](https://travis-ci.org/GemHQ/secp256k1-rb) [![Coverage Status](https://img.shields.io/coveralls/GemHQ/secp256k1-rb.svg)](https://coveralls.io/r/GemHQ/secp256k1-rb) [![Code Climate](https://codeclimate.com/github/GemHQ/secp256k1-rb.png)](https://codeclimate.com/github/GemHQ/secp256k1-rb) [![Gem Version](https://badge.fury.io/rb/secp256k1.png)](http://badge.fury.io/rb/secp256k1)
 
-# Secp256k1: A ruby wrapper for libsecp256k1
+# secp256k1: a Ruby wrapper for libsecp256k1
 
-This is a ruby wrapper for using libsecp256k1 in Ruby. The c library was originally written by Peter Wiulle for use in Bitcoin core libraries to replace OpenSSL for Bitcoin cryptographic functions.
-This FFI wrapper was originally written by Andy Alness and gemified by Micah Winkelspecht.
+This Ruby gem wraps [libsecp256k1](https://github.com/bitcoin/secp256k1), an optimized C library for EC operations on the secp256k1 curve.  The C library was originally written by Peter Wiulle for Bitcoin Core.  This FFI wrapper was originally written by Andy Alness and gemified by Micah Winkelspecht.
 
 ## Installation instructions
 
-You must first install libsecp256k1
+If you are using Mac OS X and Homebrew, run these commands to install required development tools:
 
 ````
-    $ brew install autoconf
-    $ brew install automake
-    $ brew install libtool
+$ brew install autoconf
+$ brew install automake
+$ brew install libtool
+````
 
-    $ git clone git@github.com:bitcoin/secp256k1.git
-    $ cd secp256k1
+Then download and install the library:
 
-    $ ./autogem.sh
-    $ ./configure
-    $ make
-    $ sudo make install
-
+````
+$ git clone git@github.com:bitcoin/secp256k1.git
+$ cd secp256k1
+$ ./autogen.sh
+$ ./configure
+$ make
+$ sudo make install
 ````
 
 Then install the secp256k1 gem:
 
 ````
-    $ gem install secp256k1
+$ gem install secp256k1
 ````
 
 Or add this line to your Gemfile:
 
 ````
-    gem 'secp256k1'
+gem 'secp256k1'
 ````
