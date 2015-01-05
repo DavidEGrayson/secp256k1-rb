@@ -1,5 +1,7 @@
 # encoding: ascii-8bit
 
+require 'securerandom'
+
 # Wraps libsecp256k1 (https://github.com/bitcoin/secp256k1)
 module Secp256k1
   require 'ffi'
