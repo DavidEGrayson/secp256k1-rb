@@ -30,7 +30,7 @@ module Secp256k1
     attach_function :secp256k1_ecdsa_sign, [:pointer, :pointer, :pointer, :pointer, :nonce_function, :pointer], :int
     attach_function :secp256k1_ecdsa_verify, [:pointer, :pointer, :int, :pointer, :int], :int
     attach_function :secp256k1_ecdsa_sign_compact, [:pointer, :pointer, :pointer, :nonce_function, :pointer, :pointer], :int
-    attach_function :secp256k1_ecdsa_recover_compact, [:pointer, :int, :pointer, :pointer, :pointer, :int, :int], :int
+    attach_function :secp256k1_ecdsa_recover_compact, [:pointer, :pointer, :pointer, :pointer, :int, :int], :int
   end
 
   def self.init
@@ -80,6 +80,7 @@ module Secp256k1
     end
 
     result = secp256k1_ecdsa_sign(hash_buf, sig_buf, sig_size, priv_key, nonce_proc, nil)
+    check_signing_result(result)
 
     sig_buf.read_string(sig_size.read_int)
   end
@@ -109,11 +110,12 @@ module Secp256k1
     result == 1
   end
 
-  def self.sign_compact(message, priv_key, compressed=true)
+  def self.sign_compact(data, priv_key, compressed=true)
     init
 
-    message_buf = FFI::MemoryPointer.new(:uchar, message.bytesize)
-    message_buf.put_bytes(0, message)
+    hash = Digest::SHA256.digest Digest::SHA256.digest data
+    hash_buf = FFI::MemoryPointer.new(:uchar, 32)
+    hash_buf.put_bytes(0, hash)
 
     sig_buf = FFI::MemoryPointer.new(:uchar, 64)
 
@@ -122,17 +124,19 @@ module Secp256k1
 
     rec_id = FFI::MemoryPointer.new(:int)
 
-    while true do
-      nonce = FFI::MemoryPointer.new(:uchar, 32)
-      nonce.put_bytes(0, SecureRandom.random_bytes(32))
-      break if secp256k1_ecdsa_sign_compact(message_buf, message.bytesize, sig_buf, priv_key, nonce, rec_id)
+    nonce_proc = Proc.new do |nonce32, msg32, key32, attempt, data|
+      nonce32.put_bytes(0, SecureRandom.random_bytes(32))
+      1
     end
+
+    result = secp256k1_ecdsa_sign_compact(hash_buf, sig_buf, priv_key, nonce_proc, nil, rec_id)
+    check_signing_result(result)
 
     header = [27 + rec_id.read_int + (compressed ? 4 : 0)].pack("C")
     [ header, sig_buf.read_string(64) ].join
   end
 
-  def self.recover_compact(message, signature)
+  def self.recover_compact(data, signature)
     init
 
     return nil if signature.bytesize != 65
@@ -144,8 +148,9 @@ module Secp256k1
     version -= 4 if compressed
     rec_id = version - 27
 
-    message_buf = FFI::MemoryPointer.new(:uchar, message.bytesize)
-    message_buf.put_bytes(0, message)
+    hash = Digest::SHA256.digest Digest::SHA256.digest data
+    hash_buf = FFI::MemoryPointer.new(:uchar, 32)
+    hash_buf.put_bytes(0, hash)
 
     signature[0] = ''
     sig_buf = FFI::MemoryPointer.new(:uchar, signature.bytesize)
@@ -156,7 +161,7 @@ module Secp256k1
     pub_key_size = FFI::MemoryPointer.new(:int)
     pub_key_size.write_int(pub_key_len)
 
-    result = secp256k1_ecdsa_recover_compact(message_buf, message.bytesize,
+    result = secp256k1_ecdsa_recover_compact(hash_buf,
                                              sig_buf,
                                              pub_key_buf, pub_key_size,
                                              compressed ? 1 : 0,
@@ -164,5 +169,15 @@ module Secp256k1
     return nil unless result
 
     pub_key_buf.read_bytes(pub_key_size.read_int)
+  end
+
+  private
+
+  def self.check_signing_result(result)
+    case result
+    when 0 then raise "Nonce generation function failed."
+    when 1 then
+    else raise "Unexpected signing result code: #{result}"
+    end
   end
 end
