@@ -14,7 +14,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'ffi'
 
   spec.add_development_dependency 'bundler'
-  spec.add_development_dependency 'rspec', '~>2.0'
+  spec.add_development_dependency 'rspec'
   spec.add_development_dependency 'simplecov'
   spec.add_development_dependency 'coveralls'
   spec.add_development_dependency 'pry'
