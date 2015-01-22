@@ -1,11 +1,15 @@
 # encoding: ascii-8bit
 
-require 'securerandom'
+require 'ffi'
+require 'securerandom'  # TODO: remove
+require 'digest'  # TODO: remove
 
 # Wraps libsecp256k1 (https://github.com/bitcoin/secp256k1)
 module Secp256k1
-  require 'ffi'
   extend ::FFI::Library
+
+  # This corresponds to secp256k1_nonce_function_t in secp256k1.h.
+  callback :nonce_function, [:pointer, :pointer, :pointer, :uint, :pointer], :int
 
   SECP256K1_START_VERIFY = (1 << 0)
   SECP256K1_START_SIGN   = (1 << 1)
@@ -23,9 +27,9 @@ module Secp256k1
     attach_function :secp256k1_stop, [], :void
     attach_function :secp256k1_ec_seckey_verify, [:pointer], :int
     attach_function :secp256k1_ec_pubkey_create, [:pointer, :pointer, :pointer, :int], :int
-    attach_function :secp256k1_ecdsa_sign, [:pointer, :int, :pointer, :pointer, :pointer, :pointer], :int
-    attach_function :secp256k1_ecdsa_verify, [:pointer, :int, :pointer, :int, :pointer, :int], :int
-    attach_function :secp256k1_ecdsa_sign_compact, [:pointer, :int, :pointer, :pointer, :pointer, :pointer], :int
+    attach_function :secp256k1_ecdsa_sign, [:pointer, :pointer, :pointer, :pointer, :nonce_function, :pointer], :int
+    attach_function :secp256k1_ecdsa_verify, [:pointer, :pointer, :int, :pointer, :int], :int
+    attach_function :secp256k1_ecdsa_sign_compact, [:pointer, :pointer, :pointer, :nonce_function, :pointer, :pointer], :int
     attach_function :secp256k1_ecdsa_recover_compact, [:pointer, :int, :pointer, :pointer, :pointer, :int, :int], :int
   end
 
@@ -53,11 +57,15 @@ module Secp256k1
     [ priv_key, pub_key_buf.read_string(pub_key_size.read_int) ]
   end
 
+  # TODO: rename to ecdsa_sign to be consistent with the library
+  # TODO: add an argument for controlling the nonce generation
+  # It should accept things like :default, :rfc6979, SecureRandom, Integer, and Proc
   def self.sign(data, priv_key)
     init
 
-    data_buf = FFI::MemoryPointer.new(:uchar, data.bytesize)
-    data_buf.put_bytes(0, data)
+    hash = Digest::SHA256.digest Digest::SHA256.digest data
+    hash_buf = FFI::MemoryPointer.new(:uchar, 32)
+    hash_buf.put_bytes(0, hash)
 
     sig_buf = FFI::MemoryPointer.new(:uchar, 72)
     sig_size = FFI::MemoryPointer.new(:int)
@@ -66,11 +74,12 @@ module Secp256k1
     priv_key_buf = FFI::MemoryPointer.new(:uchar, priv_key.bytesize)
     priv_key_buf.put_bytes(0, priv_key)
 
-    while true do
-      nonce = FFI::MemoryPointer.new(:uchar, 32)
-      nonce.put_bytes(0, SecureRandom.random_bytes(32))
-      break if secp256k1_ecdsa_sign(data_buf, data.bytesize, sig_buf, sig_size, priv_key, nonce)
+    nonce_proc = Proc.new do |nonce32, msg32, key32, attempt, data|
+      nonce32.put_bytes(0, SecureRandom.random_bytes(32))
+      1
     end
+
+    result = secp256k1_ecdsa_sign(hash_buf, sig_buf, sig_size, priv_key, nonce_proc, nil)
 
     sig_buf.read_string(sig_size.read_int)
   end
@@ -78,8 +87,9 @@ module Secp256k1
   def self.verify(data, signature, pub_key)
     init
 
-    data_buf = FFI::MemoryPointer.new(:uchar, data.bytesize)
-    data_buf.put_bytes(0, data)
+    hash = Digest::SHA256.digest Digest::SHA256.digest data
+    hash_buf = FFI::MemoryPointer.new(:uchar, 32)
+    hash_buf.put_bytes(0, hash)
 
     sig_buf = FFI::MemoryPointer.new(:uchar, signature.bytesize)
     sig_buf.put_bytes(0, signature)
@@ -87,7 +97,7 @@ module Secp256k1
     pub_key_buf = FFI::MemoryPointer.new(:uchar, pub_key.bytesize)
     pub_key_buf.put_bytes(0, pub_key)
 
-    result = secp256k1_ecdsa_verify(data_buf, data.bytesize,
+    result = secp256k1_ecdsa_verify(hash_buf,
                                     sig_buf, signature.bytesize,
                                     pub_key_buf, pub_key.bytesize)
     if result == -1
