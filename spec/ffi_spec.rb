@@ -2,7 +2,6 @@
 
 require_relative 'spec_helper.rb'
 require 'secp256k1'
-include Secp256k1
 
 describe 'libsecp256k1' do
 

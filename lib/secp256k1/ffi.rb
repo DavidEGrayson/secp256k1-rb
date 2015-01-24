@@ -11,27 +11,18 @@ module Secp256k1
   # This corresponds to secp256k1_nonce_function_t in secp256k1.h.
   callback :nonce_function, [:pointer, :pointer, :pointer, :uint, :pointer], :int
 
+  ffi_lib 'secp256k1'
+  attach_function :secp256k1_start, [:int], :void
+  attach_function :secp256k1_stop, [], :void
+  attach_function :secp256k1_ec_seckey_verify, [:pointer], :int
+  attach_function :secp256k1_ec_pubkey_create, [:pointer, :pointer, :pointer, :int], :int
+  attach_function :secp256k1_ecdsa_sign, [:pointer, :pointer, :pointer, :pointer, :nonce_function, :pointer], :int
+  attach_function :secp256k1_ecdsa_verify, [:pointer, :pointer, :int, :pointer, :int], :int
+  attach_function :secp256k1_ecdsa_sign_compact, [:pointer, :pointer, :pointer, :nonce_function, :pointer, :pointer], :int
+  attach_function :secp256k1_ecdsa_recover_compact, [:pointer, :pointer, :pointer, :pointer, :int, :int], :int
+
   SECP256K1_START_VERIFY = (1 << 0)
   SECP256K1_START_SIGN   = (1 << 1)
-
-  # Load secp256k1 library and attach functions from C to Ruby via FFI.
-  def self.included(_base)
-    ffi_lib 'secp256k1'
-    attach_functions!
-  rescue LoadError => e
-    warn e.message
-  end
-
-  def self.attach_functions!
-    attach_function :secp256k1_start, [:int], :void
-    attach_function :secp256k1_stop, [], :void
-    attach_function :secp256k1_ec_seckey_verify, [:pointer], :int
-    attach_function :secp256k1_ec_pubkey_create, [:pointer, :pointer, :pointer, :int], :int
-    attach_function :secp256k1_ecdsa_sign, [:pointer, :pointer, :pointer, :pointer, :nonce_function, :pointer], :int
-    attach_function :secp256k1_ecdsa_verify, [:pointer, :pointer, :int, :pointer, :int], :int
-    attach_function :secp256k1_ecdsa_sign_compact, [:pointer, :pointer, :pointer, :nonce_function, :pointer, :pointer], :int
-    attach_function :secp256k1_ecdsa_recover_compact, [:pointer, :pointer, :pointer, :pointer, :int, :int], :int
-  end
 
   def self.init
     return if @secp256k1_started
