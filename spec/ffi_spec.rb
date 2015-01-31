@@ -1,7 +1,6 @@
 # encoding: ascii-8bit
 
-require_relative 'spec_helper.rb'
-require 'secp256k1'
+require_relative 'spec_helper'
 
 describe 'libsecp256k1' do
 
