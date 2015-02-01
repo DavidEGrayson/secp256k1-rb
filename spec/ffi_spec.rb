@@ -67,12 +67,6 @@ describe Secp256k1 do
       end
     end
 
-    it 'sign and verify' do
-      priv, pub = Secp256k1.generate_key_pair
-      signature = Secp256k1.sign("derp", priv)
-      expect(Secp256k1.verify("derp", signature, pub)).to eql(true)
-    end
-
     it 'sign compact and recover' do
       priv, pub = Secp256k1.generate_key_pair
       signature = Secp256k1.sign_compact("derp", priv)

@@ -89,52 +89,6 @@ module Secp256k1
     [ priv_key, pub_key_buf.read_string(pub_key_size.read_int) ]
   end
 
-  def self.sign(data, priv_key)
-    hash = Digest::SHA256.digest Digest::SHA256.digest data
-    hash_buf = FFI::MemoryPointer.new(:uchar, 32)
-    hash_buf.put_bytes(0, hash)
-
-    sig_buf = FFI::MemoryPointer.new(:uchar, 72)
-    sig_size = FFI::MemoryPointer.new(:int)
-    sig_size.write_int(72)
-
-    priv_key_buf = FFI::MemoryPointer.new(:uchar, priv_key.bytesize)
-    priv_key_buf.put_bytes(0, priv_key)
-
-    nonce_proc = Proc.new do |nonce32, msg32, key32, attempt, data|
-      nonce32.put_bytes(0, SecureRandom.random_bytes(32))
-      1
-    end
-
-    result = secp256k1_ecdsa_sign(hash_buf, sig_buf, sig_size, priv_key, nonce_proc, nil)
-    check_signing_result(result)
-
-    sig_buf.read_string(sig_size.read_int)
-  end
-
-  def self.verify(data, signature, pub_key)
-    hash = Digest::SHA256.digest Digest::SHA256.digest data
-    hash_buf = FFI::MemoryPointer.new(:uchar, 32)
-    hash_buf.put_bytes(0, hash)
-
-    sig_buf = FFI::MemoryPointer.new(:uchar, signature.bytesize)
-    sig_buf.put_bytes(0, signature)
-
-    pub_key_buf = FFI::MemoryPointer.new(:uchar, pub_key.bytesize)
-    pub_key_buf.put_bytes(0, pub_key)
-
-    result = secp256k1_ecdsa_verify(hash_buf,
-                                    sig_buf, signature.bytesize,
-                                    pub_key_buf, pub_key.bytesize)
-    if result == -1
-      raise "error invalid pubkey"
-    elsif result == -2
-      raise "error invalid signature"
-    end
-
-    result == 1
-  end
-
   def self.sign_compact(data, priv_key, compressed=true)
     hash = Digest::SHA256.digest Digest::SHA256.digest data
     hash_buf = FFI::MemoryPointer.new(:uchar, 32)
