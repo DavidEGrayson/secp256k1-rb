@@ -24,15 +24,20 @@ module Secp256k1
   SECP256K1_START_VERIFY = (1 << 0)
   SECP256K1_START_SIGN   = (1 << 1)
 
-  def self.init
-    return if @secp256k1_started
-    secp256k1_start(SECP256K1_START_VERIFY | SECP256K1_START_SIGN)
-    @secp256k1_started = true
+  def self.start(opts)
+    flags = 0
+    flags |= SECP256K1_START_VERIFY if opts[:verify]
+    flags |= SECP256K1_START_SIGN if opts[:sign]
+    secp256k1_start(flags)
+    nil
+  end
+
+  def self.stop
+    secp256k1_stop
+    nil
   end
 
   def self.generate_key_pair(compressed=true)
-    init
-
     while true do
       priv_key = SecureRandom.random_bytes(32)
       priv_key_buf = FFI::MemoryPointer.new(:uchar, 32)
@@ -52,8 +57,6 @@ module Secp256k1
   # TODO: add an argument for controlling the nonce generation
   # It should accept things like :default, :rfc6979, SecureRandom, Integer, and Proc
   def self.sign(data, priv_key)
-    init
-
     hash = Digest::SHA256.digest Digest::SHA256.digest data
     hash_buf = FFI::MemoryPointer.new(:uchar, 32)
     hash_buf.put_bytes(0, hash)
@@ -77,8 +80,6 @@ module Secp256k1
   end
 
   def self.verify(data, signature, pub_key)
-    init
-
     hash = Digest::SHA256.digest Digest::SHA256.digest data
     hash_buf = FFI::MemoryPointer.new(:uchar, 32)
     hash_buf.put_bytes(0, hash)
@@ -102,8 +103,6 @@ module Secp256k1
   end
 
   def self.sign_compact(data, priv_key, compressed=true)
-    init
-
     hash = Digest::SHA256.digest Digest::SHA256.digest data
     hash_buf = FFI::MemoryPointer.new(:uchar, 32)
     hash_buf.put_bytes(0, hash)
@@ -128,8 +127,6 @@ module Secp256k1
   end
 
   def self.recover_compact(data, signature)
-    init
-
     return nil if signature.bytesize != 65
 
     version = signature.unpack('C')[0]

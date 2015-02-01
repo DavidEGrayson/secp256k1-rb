@@ -9,7 +9,8 @@ Features of this wrapper (which have not all been achieved yet):
 * Provides access to all features of the secp256k1 library.
 * Does not add any new features.
 * Avoids making arbitrary decisions when possible.
-* Provides a safe interface: there should be no way for a user of the wrapper to cause segmentation faults or memory leaks.
+* Provides a safe interface: there should be no way for a user of the wrapper to cause undefined behavior or memory leaks.  (One exception is multiple threads are used in an unsafe way.)
+* Avoids making assumptions about the behavior of the library that do not come from the official documentation.
 
 
 ## Installation instructions

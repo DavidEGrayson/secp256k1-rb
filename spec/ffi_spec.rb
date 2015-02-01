@@ -2,7 +2,53 @@
 
 require_relative 'spec_helper'
 
-describe 'libsecp256k1' do
+describe Secp256k1 do
+  before(:all) do
+    Secp256k1.start verify: true, sign: true
+  end
+
+  after(:all) do
+    Secp256k1.stop
+  end
+
+  describe 'start' do
+    it 'always returns nil' do
+      allow(Secp256k1).to receive(:secp256k1_start).and_return(1234)
+      expect(Secp256k1.start({})).to eq nil
+    end
+
+    it 'when given an empty hash calls secp256k1_ecdsa_start with 0' do
+      expect(Secp256k1).to receive(:secp256k1_start).with(0)
+      Secp256k1.start({})
+    end
+
+    it 'when given {verify: true} calls secp256k1_ecdsa_start with 1' do
+      expect(Secp256k1).to receive(:secp256k1_start).with(1)
+      Secp256k1.start(verify: true)
+    end
+
+    it 'when given {sign: true} calls secp256k1_ecdsa_start with 2' do
+      expect(Secp256k1).to receive(:secp256k1_start).with(2)
+      Secp256k1.start(sign: true)
+    end
+
+    it 'when given {verify: true, sign: true} calls secp256k1_ecdsa_start with 3' do
+      expect(Secp256k1).to receive(:secp256k1_start).with(3)
+      Secp256k1.start(verify: true, sign: true)
+    end
+  end
+
+  describe 'stop' do
+    it 'returns nil' do
+      allow(Secp256k1).to receive(:secp256k1_stop).and_return(1234)
+      expect(Secp256k1.stop).to eq nil
+    end
+
+    it 'calls secp256k1_stop with no arguments' do
+      expect(Secp256k1).to receive(:secp256k1_stop).with(no_args)
+      Secp256k1.stop
+    end
+  end
 
   it 'sign and verify' do
     priv, pub = Secp256k1.generate_key_pair
