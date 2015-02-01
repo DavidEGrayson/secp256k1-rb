@@ -24,6 +24,8 @@ module Secp256k1
   SECP256K1_START_VERIFY = (1 << 0)
   SECP256K1_START_SIGN   = (1 << 1)
 
+  MAX_SIGNATURE_SIZE = 72
+
   def self.start(opts)
     flags = 0
     flags |= SECP256K1_START_VERIFY if opts[:verify]
@@ -35,6 +37,40 @@ module Secp256k1
   def self.stop
     secp256k1_stop
     nil
+  end
+
+  def self.ecdsa_sign(msg32, seckey, nonce_spec)
+    # TODO: more options for controlling the nonce generation
+    # It should accept things like :default, :rfc6979, SecureRandom, Integer, and Proc
+    # TODO: better argument checking
+
+    case nonce_spec
+    when String
+      # TODO: if nonce_spec.bytesize != 32
+      #  raise ArgumentError, "String nonces must be 32 bytes long."
+      # end
+      nonce_proc = Proc.new do |nonce32, msg32, key32, attempt, data|
+        nonce32.put_bytes(0, nonce_spec)
+        1
+      end
+    else
+      raise ArgumentError, "Invalid nonce specification."
+    end
+
+    sig_buf = FFI::MemoryPointer.new(:uchar, MAX_SIGNATURE_SIZE)
+    sig_size = FFI::MemoryPointer.new(:int)
+    sig_size.write_int(MAX_SIGNATURE_SIZE)
+
+    result = secp256k1_ecdsa_sign(msg32, sig_buf, sig_size, seckey, nonce_proc, nil)
+
+    # TODO: check_signing_result(result)
+
+    sig_buf.read_string(sig_size.read_int)
+  end
+
+  def self.ecdsa_verify(msg32, sig, pubkey)
+    # TODO: better argument checking
+    secp256k1_ecdsa_verify(msg32, sig, sig.bytesize, pubkey, pubkey.bytesize)
   end
 
   def self.generate_key_pair(compressed=true)
@@ -53,9 +89,6 @@ module Secp256k1
     [ priv_key, pub_key_buf.read_string(pub_key_size.read_int) ]
   end
 
-  # TODO: rename to ecdsa_sign to be consistent with the library
-  # TODO: add an argument for controlling the nonce generation
-  # It should accept things like :default, :rfc6979, SecureRandom, Integer, and Proc
   def self.sign(data, priv_key)
     hash = Digest::SHA256.digest Digest::SHA256.digest data
     hash_buf = FFI::MemoryPointer.new(:uchar, 32)

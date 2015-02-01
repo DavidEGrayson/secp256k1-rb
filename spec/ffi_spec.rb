@@ -51,6 +51,22 @@ describe Secp256k1 do
       Secp256k1.stop
     end
 
+    describe 'ecdsa_sign' do
+      it 'gives the right signature' do
+        ex = ExampleSig1
+        sig = Secp256k1.ecdsa_sign(ex.message_hash, ex.secret_key, ex.nonce)
+        expect(sig).to eq ex.signature
+      end
+    end
+
+    describe 'ecdsa_verify' do
+      it 'can verify a correct signature' do
+        ex = ExampleSig1
+        result = Secp256k1.ecdsa_verify(ex.message_hash, ex.signature, ex.public_key)
+        expect(result).to eq 1  # expect correct signature
+      end
+    end
+
     it 'sign and verify' do
       priv, pub = Secp256k1.generate_key_pair
       signature = Secp256k1.sign("derp", priv)
