@@ -3,14 +3,6 @@
 require_relative 'spec_helper'
 
 describe Secp256k1 do
-  before(:all) do
-    Secp256k1.start verify: true, sign: true
-  end
-
-  after(:all) do
-    Secp256k1.stop
-  end
-
   describe 'start' do
     it 'always returns nil' do
       allow(Secp256k1).to receive(:secp256k1_start).and_return(1234)
@@ -50,29 +42,39 @@ describe Secp256k1 do
     end
   end
 
-  it 'sign and verify' do
-    priv, pub = Secp256k1.generate_key_pair
-    signature = Secp256k1.sign("derp", priv)
-    expect(Secp256k1.verify("derp", signature, pub)).to eql(true)
-  end
+  context '(started)' do
+    before(:all) do
+      Secp256k1.start verify: true, sign: true
+    end
 
-  it 'sign compact and recover' do
-    priv, pub = Secp256k1.generate_key_pair
-    signature = Secp256k1.sign_compact("derp", priv)
-    expect(signature.bytesize).to eql(65)
-    pub2 = Secp256k1.recover_compact("derp", signature)
-    expect(pub2.bytesize).to eql(33)
-    expect(pub2).to eql(pub)
-  end
+    after(:all) do
+      Secp256k1.stop
+    end
 
-  it 'sign compact and recover (uncompressed)' do
-    # uncompressed
-    priv, pub = Secp256k1.generate_key_pair(compressed=false)
-    signature = Secp256k1.sign_compact("derp", priv, compressed=false)
-    expect(signature.bytesize).to eql(65)
-    pub2 = Secp256k1.recover_compact("derp", signature)
-    expect(pub2.bytesize).to eql(65)
-    expect(pub2).to eql(pub)
+    it 'sign and verify' do
+      priv, pub = Secp256k1.generate_key_pair
+      signature = Secp256k1.sign("derp", priv)
+      expect(Secp256k1.verify("derp", signature, pub)).to eql(true)
+    end
+
+    it 'sign compact and recover' do
+      priv, pub = Secp256k1.generate_key_pair
+      signature = Secp256k1.sign_compact("derp", priv)
+      expect(signature.bytesize).to eql(65)
+      pub2 = Secp256k1.recover_compact("derp", signature)
+      expect(pub2.bytesize).to eql(33)
+      expect(pub2).to eql(pub)
+    end
+
+    it 'sign compact and recover (uncompressed)' do
+      # uncompressed
+      priv, pub = Secp256k1.generate_key_pair(compressed=false)
+      signature = Secp256k1.sign_compact("derp", priv, compressed=false)
+      expect(signature.bytesize).to eql(65)
+      pub2 = Secp256k1.recover_compact("derp", signature)
+      expect(pub2.bytesize).to eql(65)
+      expect(pub2).to eql(pub)
+    end
   end
 
 end
