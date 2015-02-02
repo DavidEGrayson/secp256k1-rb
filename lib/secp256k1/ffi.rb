@@ -6,6 +6,24 @@ require 'digest'  # TODO: remove
 
 # Wraps libsecp256k1 (https://github.com/bitcoin/secp256k1)
 module Secp256k1
+
+  class Buffer32
+    extend ::FFI::DataConverter
+    native_type ::FFI::Type::BUFFER_IN
+
+    def self.to_native(value, context)
+      if !value.is_a?(String)
+        raise ArgumentError, 'argument must be a 32-byte string'
+      end
+
+      if value.bytesize != 32
+        raise ArgumentError, 'argument must be 32 bytes long'
+      end
+
+      value
+    end
+  end
+
   extend ::FFI::Library
 
   # This corresponds to secp256k1_nonce_function_t in secp256k1.h.
@@ -14,12 +32,20 @@ module Secp256k1
   ffi_lib 'secp256k1'
   attach_function :secp256k1_start, [:int], :void
   attach_function :secp256k1_stop, [], :void
-  attach_function :secp256k1_ec_seckey_verify, [:pointer], :int
-  attach_function :secp256k1_ec_pubkey_create, [:pointer, :pointer, :pointer, :int], :int
-  attach_function :secp256k1_ecdsa_sign, [:pointer, :pointer, :pointer, :pointer, :nonce_function, :pointer], :int
-  attach_function :secp256k1_ecdsa_verify, [:pointer, :pointer, :int, :pointer, :int], :int
-  attach_function :secp256k1_ecdsa_sign_compact, [:pointer, :pointer, :pointer, :nonce_function, :pointer, :pointer], :int
-  attach_function :secp256k1_ecdsa_recover_compact, [:pointer, :pointer, :pointer, :pointer, :int, :int], :int
+  attach_function :secp256k1_ecdsa_verify, [Buffer32, :buffer_in, :int, :buffer_in, :int], :int
+  attach_function :secp256k1_ecdsa_sign, [Buffer32, :buffer_out, :pointer, :pointer, :nonce_function, :pointer], :int
+  attach_function :secp256k1_ecdsa_sign_compact, [Buffer32, :pointer, :pointer, :nonce_function, :pointer, :pointer], :int
+  attach_function :secp256k1_ecdsa_recover_compact, [Buffer32, :buffer_in, :buffer_out, :pointer, :int, :int], :int
+  attach_function :secp256k1_ec_seckey_verify, [Buffer32], :int
+  attach_function :secp256k1_ec_pubkey_verify, [Buffer32, :int], :int
+  attach_function :secp256k1_ec_pubkey_create, [:buffer_out, :pointer, Buffer32, :int], :int
+  attach_function :secp256k1_ec_pubkey_decompress, [:buffer_inout, :pointer], :int
+  attach_function :secp256k1_ec_privkey_export, [Buffer32, :buffer_out, :pointer, :int], :int
+  attach_function :secp256k1_ec_privkey_import, [:buffer_out, :buffer_in, :int], :int
+  attach_function :secp256k1_ec_privkey_tweak_add, [:buffer_inout, :buffer_in], :int
+  attach_function :secp256k1_ec_pubkey_tweak_add, [:buffer_in, :int, :buffer_in], :int
+  attach_function :secp256k1_ec_privkey_tweak_mul, [:buffer_inout, :buffer_in], :int
+  attach_function :secp256k1_ec_pubkey_tweak_mul, [:buffer_inout, :int, :buffer_in], :int
 
   SECP256K1_START_VERIFY = (1 << 0)
   SECP256K1_START_SIGN   = (1 << 1)
@@ -76,14 +102,12 @@ module Secp256k1
   def self.generate_key_pair(compressed=true)
     while true do
       priv_key = SecureRandom.random_bytes(32)
-      priv_key_buf = FFI::MemoryPointer.new(:uchar, 32)
-      priv_key_buf.put_bytes(0, priv_key)
-      break if secp256k1_ec_seckey_verify(priv_key_buf)
+      break if secp256k1_ec_seckey_verify(priv_key)
     end
 
     pub_key_buf = FFI::MemoryPointer.new(:uchar, 65)
     pub_key_size = FFI::MemoryPointer.new(:int)
-    result = secp256k1_ec_pubkey_create(pub_key_buf, pub_key_size, priv_key_buf, compressed ? 1 : 0)
+    result = secp256k1_ec_pubkey_create(pub_key_buf, pub_key_size, priv_key, compressed ? 1 : 0)
     raise "error creating pubkey" unless result
 
     [ priv_key, pub_key_buf.read_string(pub_key_size.read_int) ]
@@ -91,8 +115,6 @@ module Secp256k1
 
   def self.sign_compact(data, priv_key, compressed=true)
     hash = Digest::SHA256.digest Digest::SHA256.digest data
-    hash_buf = FFI::MemoryPointer.new(:uchar, 32)
-    hash_buf.put_bytes(0, hash)
 
     sig_buf = FFI::MemoryPointer.new(:uchar, 64)
 
@@ -106,7 +128,7 @@ module Secp256k1
       1
     end
 
-    result = secp256k1_ecdsa_sign_compact(hash_buf, sig_buf, priv_key, nonce_proc, nil, rec_id)
+    result = secp256k1_ecdsa_sign_compact(hash, sig_buf, priv_key, nonce_proc, nil, rec_id)
     check_signing_result(result)
 
     header = [27 + rec_id.read_int + (compressed ? 4 : 0)].pack("C")
@@ -124,8 +146,6 @@ module Secp256k1
     rec_id = version - 27
 
     hash = Digest::SHA256.digest Digest::SHA256.digest data
-    hash_buf = FFI::MemoryPointer.new(:uchar, 32)
-    hash_buf.put_bytes(0, hash)
 
     signature[0] = ''
     sig_buf = FFI::MemoryPointer.new(:uchar, signature.bytesize)
@@ -136,7 +156,7 @@ module Secp256k1
     pub_key_size = FFI::MemoryPointer.new(:int)
     pub_key_size.write_int(pub_key_len)
 
-    result = secp256k1_ecdsa_recover_compact(hash_buf,
+    result = secp256k1_ecdsa_recover_compact(hash,
                                              sig_buf,
                                              pub_key_buf, pub_key_size,
                                              compressed ? 1 : 0,

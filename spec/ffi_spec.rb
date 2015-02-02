@@ -52,10 +52,23 @@ describe Secp256k1 do
     end
 
     describe 'ecdsa_sign' do
+      let(:ex) { ExampleSig1 }
+
       it 'gives the right signature' do
-        ex = ExampleSig1
         sig = Secp256k1.ecdsa_sign(ex.message_hash, ex.secret_key, ex.nonce)
         expect(sig).to eq ex.signature
+      end
+
+      it 'raises an ArgumentError if the msg32 is not a string' do
+        message_hash = FFI::MemoryPointer.new(:uchar, 32)
+        expect { Secp256k1.ecdsa_sign(message_hash, ex.secret_key, ex.nonce) }
+          .to raise_error ArgumentError, 'argument must be a 32-byte string'
+      end
+
+      it 'raises an ArgumentError if msg32 is not 32 bytes' do
+        message_hash = "\x00" * 31
+        expect { Secp256k1.ecdsa_sign(message_hash, ex.secret_key, ex.nonce) }
+          .to raise_error ArgumentError, 'argument must be 32 bytes long'
       end
     end
 
