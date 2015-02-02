@@ -60,9 +60,15 @@ describe Secp256k1 do
     end
 
     describe 'ecdsa_verify' do
-      it 'can verify a correct signature' do
+      it 'can verify a correct signature with low S value' do
         ex = ExampleSig1
         result = Secp256k1.ecdsa_verify(ex.message_hash, ex.signature, ex.public_key)
+        expect(result).to eq 1  # expect correct signature
+      end
+
+      it 'can verify a correct signature with high S value' do
+        ex = ExampleSig1
+        result = Secp256k1.ecdsa_verify(ex.message_hash, ex.signature_alt, ex.public_key)
         expect(result).to eq 1  # expect correct signature
       end
     end
