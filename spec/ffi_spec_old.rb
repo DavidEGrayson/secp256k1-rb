@@ -1,3 +1,5 @@
+# TODO: remove this file
+
 # encoding: ascii-8bit
 
 require_relative 'spec_helper'

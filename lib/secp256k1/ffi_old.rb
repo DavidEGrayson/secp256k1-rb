@@ -1,3 +1,5 @@
+# TODO: remove this file
+
 # encoding: ascii-8bit
 
 require 'ffi'
@@ -6,64 +8,6 @@ require 'digest'  # TODO: remove
 
 # Wraps libsecp256k1 (https://github.com/bitcoin/secp256k1)
 module Secp256k1
-
-  class Buffer32
-    extend ::FFI::DataConverter
-    native_type ::FFI::Type::BUFFER_IN
-
-    def self.to_native(value, context)
-      if !value.is_a?(String)
-        raise ArgumentError, 'argument must be a 32-byte string'
-      end
-
-      if value.bytesize != 32
-        raise ArgumentError, 'argument must be 32 bytes long'
-      end
-
-      value
-    end
-  end
-
-  extend ::FFI::Library
-
-  # This corresponds to secp256k1_nonce_function_t in secp256k1.h.
-  callback :nonce_function, [:pointer, :pointer, :pointer, :uint, :pointer], :int
-
-  ffi_lib 'secp256k1'
-  attach_function :secp256k1_start, [:int], :void
-  attach_function :secp256k1_stop, [], :void
-  attach_function :secp256k1_ecdsa_verify, [Buffer32, :buffer_in, :int, :buffer_in, :int], :int
-  attach_function :secp256k1_ecdsa_sign, [Buffer32, :buffer_out, :pointer, :pointer, :nonce_function, :pointer], :int
-  attach_function :secp256k1_ecdsa_sign_compact, [Buffer32, :pointer, :pointer, :nonce_function, :pointer, :pointer], :int
-  attach_function :secp256k1_ecdsa_recover_compact, [Buffer32, :buffer_in, :buffer_out, :pointer, :int, :int], :int
-  attach_function :secp256k1_ec_seckey_verify, [Buffer32], :int
-  attach_function :secp256k1_ec_pubkey_verify, [Buffer32, :int], :int
-  attach_function :secp256k1_ec_pubkey_create, [:buffer_out, :pointer, Buffer32, :int], :int
-  attach_function :secp256k1_ec_pubkey_decompress, [:buffer_inout, :pointer], :int
-  attach_function :secp256k1_ec_privkey_export, [Buffer32, :buffer_out, :pointer, :int], :int
-  attach_function :secp256k1_ec_privkey_import, [:buffer_out, :buffer_in, :int], :int
-  attach_function :secp256k1_ec_privkey_tweak_add, [:buffer_inout, :buffer_in], :int
-  attach_function :secp256k1_ec_pubkey_tweak_add, [:buffer_in, :int, :buffer_in], :int
-  attach_function :secp256k1_ec_privkey_tweak_mul, [:buffer_inout, :buffer_in], :int
-  attach_function :secp256k1_ec_pubkey_tweak_mul, [:buffer_inout, :int, :buffer_in], :int
-
-  SECP256K1_START_VERIFY = (1 << 0)
-  SECP256K1_START_SIGN   = (1 << 1)
-
-  MAX_SIGNATURE_SIZE = 72
-
-  def self.start(opts)
-    flags = 0
-    flags |= SECP256K1_START_VERIFY if opts[:verify]
-    flags |= SECP256K1_START_SIGN if opts[:sign]
-    secp256k1_start(flags)
-    nil
-  end
-
-  def self.stop
-    secp256k1_stop
-    nil
-  end
 
   def self.ecdsa_sign(msg32, seckey, nonce_spec)
     # TODO: more options for controlling the nonce generation
