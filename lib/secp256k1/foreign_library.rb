@@ -33,6 +33,21 @@ module Secp256k1
       #end
     end
 
+    class SecretKeyConverter
+      extend FFI::DataConverter
+      native_type FFI::Type::BUFFER_IN
+
+      def self.to_native(value, context)
+        if !value.is_a?(String)
+          raise ArgumentError, 'secret key argument must be a string'
+        end
+
+        # TODO: also make sure it is 32 bytes
+
+        value
+      end
+    end
+
     extend FFI::Library
 
     SECP256K1_START_VERIFY = (1 << 0)
@@ -75,7 +90,7 @@ module Secp256k1
                       Buffer32Converter,
                       :buffer_out,
                       :pointer,
-                      :pointer,
+                      SecretKeyConverter,
                       :nonce_function,
                       :pointer,
                     ], :int
@@ -84,7 +99,7 @@ module Secp256k1
                       ContextPointerConverter,
                       Buffer32Converter,
                       :pointer,
-                      :pointer,
+                      SecretKeyConverter,
                       :nonce_function,
                       :pointer,
                       :pointer
@@ -114,7 +129,7 @@ module Secp256k1
     attach_function :secp256k1_ec_pubkey_create, [
                       ContextPointerConverter,
                       :buffer_out,
-                      :pointer,
+                      SecretKeyConverter,
                       Buffer32Converter,
                       :int,
                     ], :int
@@ -127,7 +142,7 @@ module Secp256k1
 
     attach_function :secp256k1_ec_privkey_export, [
                       ContextPointerConverter,
-                      Buffer32Converter,
+                      SecretKeyConverter,
                       :buffer_out,
                       :pointer,
                       :int,
