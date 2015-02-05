@@ -14,17 +14,17 @@ module Secp256k1
       @ptr = FFI::AutoPointer.new(pointer, destroyer)
     end
 
-    def ecdsa_sign(msg32, seckey, nonce_spec)
+    def ecdsa_sign(msg32, seckey, noncefp)
       msg32 = Argument::MessageHash.new(msg32)
       seckey = Argument::SecretKeyIn.new(seckey)
+      noncefp = Argument::NonceFunction.new(noncefp)
 
       sig_buf = FFI::MemoryPointer.new(:uchar, ForeignLibrary::MAX_SIGNATURE_SIZE)
       sig_size = FFI::MemoryPointer.new(:int)
       sig_size.write_int(ForeignLibrary::MAX_SIGNATURE_SIZE)
 
-      nonce_func = self.class.nonce_func(nonce_spec)
       result = @lib.secp256k1_ecdsa_sign(@ptr, msg32.for_ffi, sig_buf, sig_size,
-                                         seckey.for_ffi, nonce_func, nil)
+                                         seckey.for_ffi, noncefp.for_ffi, nil)
 
       # TODO: check_signing_result(result)
 
@@ -34,22 +34,6 @@ module Secp256k1
     def ecdsa_verify(msg32, sig, pubkey)
       msg32 = Argument::MessageHash.new(msg32)
       @lib.secp256k1_ecdsa_verify(@ptr, msg32.for_ffi, sig, sig.bytesize, pubkey, pubkey.bytesize)
-    end
-
-    private
-
-    def self.nonce_func(nonce_spec)
-      case nonce_spec
-      when Proc
-        Proc.new do |nonce32, msg32, key32, attempt, data|
-          nonce_str = nonce_spec.call(attempt)
-          # TODO: allow nonce_spec to return nil
-          nonce32.put_bytes(0, nonce_str)
-          1
-        end
-      else
-        raise ArgumentError, "Invalid nonce_spec."
-      end
     end
   end
 end

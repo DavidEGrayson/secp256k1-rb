@@ -45,5 +45,40 @@ module Secp256k1
         @seckey
       end
     end
+
+    class NonceFunction
+      def initialize(noncefp)
+        case noncefp
+        when Proc
+          @fp = wrapper_proc(noncefp)
+        else
+          raise ArgumentError, "invalid noncefp"
+        end
+      end
+
+      def for_ffi
+        @fp
+      end
+
+      private
+
+      def wrapper_proc(noncefp)
+        Proc.new do |nonce32, msg32, key32, attempt, data|
+          nonce = noncefp.call(attempt)
+          case nonce
+          when nil
+            0
+          when String
+            if nonce.bytesize != 32
+              raise 'nonce must be 32 bytes long'
+            end
+            nonce32.put_bytes(0, nonce)
+            1
+          else
+            raise 'nonce must be a string'
+          end
+        end
+      end
+    end
   end
 end
