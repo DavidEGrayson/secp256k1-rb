@@ -3,12 +3,7 @@ module Secp256k1
     class MessageHash
       def initialize(msg32)
         if !msg32.is_a?(String)
-          if msg32.respond_to?(:to_str)
-            msg32 = msg32.to_str
-          end
-          if !msg32.is_a?(String)
-            raise ArgumentError, 'msg32 must be a string'
-          end
+          raise ArgumentError, 'msg32 must be a string'
         end
 
         if msg32.bytesize != 32
@@ -28,12 +23,7 @@ module Secp256k1
         @seckey = seckey
 
         if !seckey.is_a?(String)
-          if seckey.respond_to?(:to_str)
-            seckey = seckey.to_str
-          end
-          if !seckey.is_a?(String)
-            raise ArgumentError, 'seckey must be a string'
-          end
+          raise ArgumentError, 'seckey must be a string'
         end
 
         if seckey.bytesize != 32
