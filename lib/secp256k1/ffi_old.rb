@@ -8,41 +8,6 @@ require 'digest'  # TODO: remove
 
 # Wraps libsecp256k1 (https://github.com/bitcoin/secp256k1)
 module Secp256k1
-
-  def self.ecdsa_sign(msg32, seckey, nonce_spec)
-    # TODO: more options for controlling the nonce generation
-    # It should accept things like :default, :rfc6979, SecureRandom, Integer, and Proc
-    # TODO: better argument checking
-
-    case nonce_spec
-    when String
-      # TODO: if nonce_spec.bytesize != 32
-      #  raise ArgumentError, "String nonces must be 32 bytes long."
-      # end
-      nonce_proc = Proc.new do |nonce32, msg32, key32, attempt, data|
-        nonce32.put_bytes(0, nonce_spec)
-        1
-      end
-    else
-      raise ArgumentError, "Invalid nonce specification."
-    end
-
-    sig_buf = FFI::MemoryPointer.new(:uchar, MAX_SIGNATURE_SIZE)
-    sig_size = FFI::MemoryPointer.new(:int)
-    sig_size.write_int(MAX_SIGNATURE_SIZE)
-
-    result = secp256k1_ecdsa_sign(msg32, sig_buf, sig_size, seckey, nonce_proc, nil)
-
-    # TODO: check_signing_result(result)
-
-    sig_buf.read_string(sig_size.read_int)
-  end
-
-  def self.ecdsa_verify(msg32, sig, pubkey)
-    # TODO: better argument checking
-    secp256k1_ecdsa_verify(msg32, sig, sig.bytesize, pubkey, pubkey.bytesize)
-  end
-
   def self.generate_key_pair(compressed=true)
     while true do
       priv_key = SecureRandom.random_bytes(32)
