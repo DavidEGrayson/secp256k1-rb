@@ -2,23 +2,6 @@ require 'ffi'
 
 module Secp256k1
   module ForeignLibrary
-    class Buffer32Converter
-      extend FFI::DataConverter
-      native_type FFI::Type::BUFFER_IN
-
-      def self.to_native(value, context)
-        if !value.is_a?(String)
-          raise ArgumentError, 'argument must be a 32-byte string'
-        end
-
-        if value.bytesize != 32
-          raise ArgumentError, 'argument must be 32 bytes long'
-        end
-
-        value
-      end
-    end
-
     class SecretKeyConverter
       extend FFI::DataConverter
       native_type FFI::Type::BUFFER_IN
@@ -64,7 +47,7 @@ module Secp256k1
 
     attach_function :secp256k1_ecdsa_verify, [
                       :pointer,
-                      Buffer32Converter,
+                      :buffer_in,
                       :buffer_in,
                       :int,
                       :buffer_in,
@@ -73,7 +56,7 @@ module Secp256k1
 
     attach_function :secp256k1_ecdsa_sign, [
                       :pointer,
-                      Buffer32Converter,
+                      :buffer_in,
                       :buffer_out,
                       :pointer,
                       SecretKeyConverter,
@@ -83,7 +66,7 @@ module Secp256k1
 
     attach_function :secp256k1_ecdsa_sign_compact, [
                       :pointer,
-                      Buffer32Converter,
+                      :buffer_in,
                       :pointer,
                       SecretKeyConverter,
                       :nonce_function,
@@ -93,7 +76,7 @@ module Secp256k1
 
     attach_function :secp256k1_ecdsa_recover_compact, [
                       :pointer,
-                      Buffer32Converter,
+                      :buffer_in,
                       :buffer_in,
                       :buffer_out,
                       :pointer,
@@ -103,12 +86,12 @@ module Secp256k1
 
     attach_function :secp256k1_ec_seckey_verify, [
                       :pointer,
-                      Buffer32Converter,
+                      :buffer_in,
                     ], :int
 
     attach_function :secp256k1_ec_pubkey_verify, [
                       :pointer,
-                      Buffer32Converter,
+                      :buffer_in,
                       :int,
                     ], :int
 
@@ -116,7 +99,7 @@ module Secp256k1
                       :pointer,
                       :buffer_out,
                       SecretKeyConverter,
-                      Buffer32Converter,
+                      :buffer_in,
                       :int,
                     ], :int
 

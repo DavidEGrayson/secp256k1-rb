@@ -10,6 +10,7 @@ describe 'Secp256k1::Context unit tests' do
     d.stub(:secp256k1_context_create) { FFI::Pointer.new(0) }
     d
   end
+
   subject(:context) { Secp256k1::Context.new(lib: lib) }
 
   describe 'initialization' do
@@ -44,18 +45,6 @@ describe 'Secp256k1::Context integration tests' do
     it 'gives the right signature' do
       sig = context.ecdsa_sign(ex.message_hash, ex.secret_key, nonce_spec)
       expect(sig).to eq ex.signature
-    end
-
-    it 'raises an ArgumentError if the msg32 is not a string' do
-      bad_hash = 1234
-      expect { context.ecdsa_sign(bad_hash, ex.secret_key, nonce_spec) }
-        .to raise_error ArgumentError, 'argument must be a 32-byte string'
-    end
-
-    it 'raises an ArgumentError if msg32 is not 32 bytes' do
-      bad_hash = "\x00" * 31
-      expect { context.ecdsa_sign(bad_hash, ex.secret_key, nonce_spec) }
-        .to raise_error ArgumentError, 'argument must be 32 bytes long'
     end
 
     it 'raises an ArgumentError if secret_key is not a string' do
