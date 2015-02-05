@@ -26,6 +26,10 @@ module Secp256k1
       sig_buf.read_string(sig_size.read_int)
     end
 
+    def ecdsa_verify(msg32, sig, pubkey)
+      @lib.secp256k1_ecdsa_verify(@ptr, msg32, sig, sig.bytesize, pubkey, pubkey.bytesize)
+    end
+
     private
 
     def self.nonce_func(nonce_spec)

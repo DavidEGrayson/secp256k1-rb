@@ -53,4 +53,17 @@ describe 'Secp256k1::Context integration tests' do
         .to raise_error ArgumentError, 'argument must be 32 bytes long'
     end
   end
+
+  describe 'ecdsa_verify' do
+    let(:ex) { ExampleSig1 }
+    it 'can verify a correct signature with low S value' do
+      result = context.ecdsa_verify(ex.message_hash, ex.signature, ex.public_key)
+      expect(result).to eq 1  # expect correct signature
+    end
+
+    it 'can verify a correct signature with high S value' do
+      result = context.ecdsa_verify(ex.message_hash, ex.signature_alt, ex.public_key)
+      expect(result).to eq 1  # expect correct signature
+    end
+  end
 end
