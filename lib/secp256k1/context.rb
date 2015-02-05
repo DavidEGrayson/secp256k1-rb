@@ -16,6 +16,7 @@ module Secp256k1
 
     def ecdsa_sign(msg32, seckey, nonce_spec)
       msg32 = Argument::MessageHash.new(msg32)
+      seckey = Argument::SecretKeyIn.new(seckey)
 
       sig_buf = FFI::MemoryPointer.new(:uchar, ForeignLibrary::MAX_SIGNATURE_SIZE)
       sig_size = FFI::MemoryPointer.new(:int)
@@ -23,7 +24,7 @@ module Secp256k1
 
       nonce_func = self.class.nonce_func(nonce_spec)
       result = @lib.secp256k1_ecdsa_sign(@ptr, msg32.for_ffi, sig_buf, sig_size,
-                                         seckey, nonce_func, nil)
+                                         seckey.for_ffi, nonce_func, nil)
 
       # TODO: check_signing_result(result)
 

@@ -46,12 +46,6 @@ describe 'Secp256k1::Context integration tests' do
       sig = context.ecdsa_sign(ex.message_hash, ex.secret_key, nonce_spec)
       expect(sig).to eq ex.signature
     end
-
-    it 'raises an ArgumentError if secret_key is not a string' do
-      bad_sig = 1234
-      expect { context.ecdsa_sign(ex.message_hash, bad_sig, nonce_spec) }
-        .to raise_error ArgumentError, 'secret key argument must be a string'
-    end
   end
 
   describe 'ecdsa_verify' do

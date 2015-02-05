@@ -22,5 +22,28 @@ module Secp256k1
         @msg32
       end
     end
+
+    class SecretKeyIn
+      def initialize(seckey)
+        @seckey = seckey
+
+        if !seckey.is_a?(String)
+          if seckey.respond_to?(:to_str)
+            seckey = seckey.to_str
+          end
+          if !seckey.is_a?(String)
+            raise ArgumentError, 'seckey must be a string'
+          end
+        end
+
+        if seckey.bytesize != 32
+          raise ArgumentError, 'seckey must be 32 bytes long'
+        end
+      end
+
+      def for_ffi
+        @seckey
+      end
+    end
   end
 end

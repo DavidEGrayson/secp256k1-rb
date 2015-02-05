@@ -2,21 +2,6 @@ require 'ffi'
 
 module Secp256k1
   module ForeignLibrary
-    class SecretKeyConverter
-      extend FFI::DataConverter
-      native_type FFI::Type::BUFFER_IN
-
-      def self.to_native(value, context)
-        if !value.is_a?(String)
-          raise ArgumentError, 'secret key argument must be a string'
-        end
-
-        # TODO: also make sure it is 32 bytes
-
-        value
-      end
-    end
-
     extend FFI::Library
 
     SECP256K1_START_VERIFY = (1 << 0)
@@ -33,6 +18,8 @@ module Secp256k1
     ctx_const_type = :pointer
     ctx_type = :pointer
     flags_type = :int
+    seckey_const_type = :buffer_in
+    seckey_type = :pointer
 
     attach_function :secp256k1_context_create, [
                       flags_type,
@@ -55,7 +42,7 @@ module Secp256k1
                       msg32_type,
                       :buffer_in,
                       :int,
-                      :buffer_in,
+                      seckey_const_type,
                       :int,
                     ], :int
 
@@ -64,7 +51,7 @@ module Secp256k1
                       msg32_type,
                       :buffer_out,
                       :pointer,
-                      SecretKeyConverter,
+                      seckey_const_type,
                       :nonce_function,
                       :pointer,
                     ], :int
@@ -73,7 +60,7 @@ module Secp256k1
                       ctx_const_type,
                       msg32_type,
                       :pointer,
-                      SecretKeyConverter,
+                      seckey_const_type,
                       :nonce_function,
                       :pointer,
                       :pointer
@@ -91,7 +78,7 @@ module Secp256k1
 
     attach_function :secp256k1_ec_seckey_verify, [
                       ctx_const_type,
-                      :buffer_in,
+                      seckey_const_type,
                     ], :int
 
     attach_function :secp256k1_ec_pubkey_verify, [
@@ -103,8 +90,8 @@ module Secp256k1
     attach_function :secp256k1_ec_pubkey_create, [
                       ctx_const_type,
                       :buffer_out,
-                      SecretKeyConverter,
-                      :buffer_in,
+                      :pointer,
+                      seckey_const_type,
                       :int,
                     ], :int
 
@@ -116,7 +103,7 @@ module Secp256k1
 
     attach_function :secp256k1_ec_privkey_export, [
                       ctx_const_type,
-                      SecretKeyConverter,
+                      seckey_const_type,
                       :buffer_out,
                       :pointer,
                       :int,
@@ -124,33 +111,33 @@ module Secp256k1
 
     attach_function :secp256k1_ec_privkey_import, [
                       ctx_const_type,
-                      :buffer_out,
+                      seckey_type,
                       :buffer_in,
                       :int,
                     ], :int
 
     attach_function :secp256k1_ec_privkey_tweak_add, [
                       ctx_const_type,
-                      :buffer_inout,
+                      seckey_type,
                       :buffer_in,
                     ], :int
 
     attach_function :secp256k1_ec_pubkey_tweak_add, [
                       ctx_const_type,
-                      :buffer_in,
+                      seckey_type,
                       :int,
                       :buffer_in,
                     ], :int
 
     attach_function :secp256k1_ec_privkey_tweak_mul, [
                       ctx_const_type,
-                      :buffer_inout,
+                      :pointer,
                       :buffer_in,
                     ], :int
 
     attach_function :secp256k1_ec_pubkey_tweak_mul, [
                       ctx_const_type,
-                      :buffer_inout,
+                      :pointer,
                       :int,
                       :buffer_in
                     ], :int
