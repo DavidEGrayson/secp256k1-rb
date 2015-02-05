@@ -4,7 +4,12 @@ describe 'Secp256k1::Context unit tests' do
   # Unit tests for the Context class.  These do not actually call
   # the external library.
 
-  let(:lib) { double('lib') }
+  let(:lib) do
+    d = double('lib')
+    d.stub(:secp256k1_context_destroy) { |ptr| }
+    d.stub(:secp256k1_context_create) { FFI::Pointer.new(0) }
+    d
+  end
   subject(:context) { Secp256k1::Context.new(lib: lib) }
 
   describe 'initialization' do

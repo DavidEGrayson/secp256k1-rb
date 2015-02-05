@@ -9,7 +9,9 @@ module Secp256k1
       flags |= ForeignLibrary::SECP256K1_START_VERIFY if opts[:verify]
       flags |= ForeignLibrary::SECP256K1_START_SIGN if opts[:sign]
 
-      @ptr = @lib.secp256k1_context_create(flags)
+      pointer = @lib.secp256k1_context_create(flags)
+      destroyer = @lib.method(:secp256k1_context_destroy)
+      @ptr = FFI::AutoPointer.new(pointer, destroyer)
     end
 
     def ecdsa_sign(msg32, seckey, nonce_spec)

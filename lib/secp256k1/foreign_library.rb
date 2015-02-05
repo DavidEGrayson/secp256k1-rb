@@ -19,20 +19,6 @@ module Secp256k1
       end
     end
 
-    class ContextPointerConverter
-      extend FFI::DataConverter
-      native_type FFI::Type::POINTER
-
-      def self.from_native(value, context)
-        destroyer = ForeignLibrary.method(:secp256k1_context_destroy)
-        FFI::AutoPointer.new(value, destroyer)
-      end
-
-      #def self.to_native(value, context)
-      #  value
-      #end
-    end
-
     class SecretKeyConverter
       extend FFI::DataConverter
       native_type FFI::Type::BUFFER_IN
@@ -62,22 +48,22 @@ module Secp256k1
 
     attach_function :secp256k1_context_create, [
                       :int,
-                    ], ContextPointerConverter
+                    ], :pointer
 
     attach_function :secp256k1_context_initialize_sign, [
-                      ContextPointerConverter,
+                      :pointer,
                     ], :void
 
     attach_function :secp256k1_context_initialize_verify, [
-                      ContextPointerConverter,
+                      :pointer
                     ], :void
 
     attach_function :secp256k1_context_destroy, [
-                      ContextPointerConverter,
+                      :pointer,
                     ], :void
 
     attach_function :secp256k1_ecdsa_verify, [
-                      ContextPointerConverter,
+                      :pointer,
                       Buffer32Converter,
                       :buffer_in,
                       :int,
@@ -86,7 +72,7 @@ module Secp256k1
                     ], :int
 
     attach_function :secp256k1_ecdsa_sign, [
-                      ContextPointerConverter,
+                      :pointer,
                       Buffer32Converter,
                       :buffer_out,
                       :pointer,
@@ -96,7 +82,7 @@ module Secp256k1
                     ], :int
 
     attach_function :secp256k1_ecdsa_sign_compact, [
-                      ContextPointerConverter,
+                      :pointer,
                       Buffer32Converter,
                       :pointer,
                       SecretKeyConverter,
@@ -106,7 +92,7 @@ module Secp256k1
                     ], :int
 
     attach_function :secp256k1_ecdsa_recover_compact, [
-                      ContextPointerConverter,
+                      :pointer,
                       Buffer32Converter,
                       :buffer_in,
                       :buffer_out,
@@ -116,18 +102,18 @@ module Secp256k1
                     ], :int
 
     attach_function :secp256k1_ec_seckey_verify, [
-                      ContextPointerConverter,
+                      :pointer,
                       Buffer32Converter,
                     ], :int
 
     attach_function :secp256k1_ec_pubkey_verify, [
-                      ContextPointerConverter,
+                      :pointer,
                       Buffer32Converter,
                       :int,
                     ], :int
 
     attach_function :secp256k1_ec_pubkey_create, [
-                      ContextPointerConverter,
+                      :pointer,
                       :buffer_out,
                       SecretKeyConverter,
                       Buffer32Converter,
@@ -135,13 +121,13 @@ module Secp256k1
                     ], :int
 
     attach_function :secp256k1_ec_pubkey_decompress, [
-                      ContextPointerConverter,
+                      :pointer,
                       :buffer_inout,
                       :pointer,
                     ], :int
 
     attach_function :secp256k1_ec_privkey_export, [
-                      ContextPointerConverter,
+                      :pointer,
                       SecretKeyConverter,
                       :buffer_out,
                       :pointer,
@@ -149,33 +135,33 @@ module Secp256k1
                     ], :int
 
     attach_function :secp256k1_ec_privkey_import, [
-                      ContextPointerConverter,
+                      :pointer,
                       :buffer_out,
                       :buffer_in,
                       :int,
                     ], :int
 
     attach_function :secp256k1_ec_privkey_tweak_add, [
-                      ContextPointerConverter,
+                      :pointer,
                       :buffer_inout,
                       :buffer_in,
                     ], :int
 
     attach_function :secp256k1_ec_pubkey_tweak_add, [
-                      ContextPointerConverter,
+                      :pointer,
                       :buffer_in,
                       :int,
                       :buffer_in,
                     ], :int
 
     attach_function :secp256k1_ec_privkey_tweak_mul, [
-                      ContextPointerConverter,
+                      :pointer,
                       :buffer_inout,
                       :buffer_in,
                     ], :int
 
     attach_function :secp256k1_ec_pubkey_tweak_mul, [
-                      ContextPointerConverter,
+                      :pointer,
                       :buffer_inout,
                       :int,
                       :buffer_in
