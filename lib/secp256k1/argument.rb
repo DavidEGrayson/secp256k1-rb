@@ -38,6 +38,8 @@ module Secp256k1
 
       def wrapper_proc(noncefp)
         Proc.new do |nonce32, msg32, key32, attempt, data|
+          # TODO: consider passing 3 arguments to the inner proc
+          # so that its interface is the same as Secp256k1.nonce_function_default
           nonce = noncefp.call(attempt)
           case nonce
           when nil
