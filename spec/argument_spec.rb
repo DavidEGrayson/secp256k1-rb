@@ -99,8 +99,23 @@ describe Secp256k1::Argument::NonceFunction do
     arg = described_class.new(:rfc6979)
     expect(arg.func).to eq Secp256k1::ForeignLibrary.secp256k1_nonce_function_rfc6979
   end
-
 end
+
+describe Secp256k1::Argument::NonceOut do
+  subject(:arg) { described_class.new }
+
+  it 'makes a 32-byte buffer for ffi' do
+    expect(arg.pointer).to be_a FFI::MemoryPointer
+    expect(arg.pointer.size).to eq 32
+  end
+
+  it 'converts the buffer to a string for ruby' do
+    str = "\x60\x00" * 16
+    arg.pointer.put_bytes(0, str)
+    expect(arg.value).to eq str
+  end
+end
+
 
 describe Secp256k1::Argument::SecretKeyIn do
   it 'lets 32-byte strings pass through' do

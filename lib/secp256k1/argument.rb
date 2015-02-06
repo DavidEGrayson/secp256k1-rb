@@ -55,6 +55,18 @@ module Secp256k1
       end
     end
 
+    class NonceOut
+      attr_reader :pointer
+
+      def initialize
+        @pointer = FFI::MemoryPointer.new(:uchar, 32)
+      end
+
+      def value
+        @pointer.read_string(32)
+      end
+    end
+
     class SecretKeyIn
       attr_reader :string
 

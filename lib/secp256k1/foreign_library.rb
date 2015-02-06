@@ -16,11 +16,12 @@ module Secp256k1
     # This corresponds to secp256k1_nonce_function_t in secp256k1.h.
     callback :nonce_function, [:pointer, :pointer, :pointer, :uint, :pointer], :int
 
-    default = lib.find_variable('secp256k1_nonce_function_default')
-    @nonce_function_default = default.read_pointer
+    pointer = lib.find_variable('secp256k1_nonce_function_default').read_pointer
+    @nonce_function_default = FFI::Function.new(:int, [:pointer, :pointer, :pointer, :uint, :pointer], pointer)
+    p @nonce_function_default
 
-    default = lib.find_variable('secp256k1_nonce_function_rfc6979')
-    @nonce_function_rfc6979 = default.read_pointer
+    rfc6979 = lib.find_variable('secp256k1_nonce_function_rfc6979').read_pointer
+    @nonce_function_rfc6979 = rfc6979.read_pointer
 
     def self.secp256k1_nonce_function_default
       @nonce_function_default

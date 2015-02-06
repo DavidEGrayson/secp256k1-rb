@@ -42,12 +42,12 @@ describe 'Secp256k1::Context integration tests' do
     let(:ex) { ExampleSig1 }
     let(:nonce_spec) { Proc.new { ex.nonce } }
 
-    it 'gives the right signature (default algorithm)' do
+    xit 'gives the right signature (default algorithm)' do
       sig = context.ecdsa_sign(ex.message_hash, ex.secret_key, :default)
       expect(sig).to eq ex.signature_nonce_default
     end
 
-    it 'gives the right signature (rfc6979)' do
+    xit 'gives the right signature (rfc6979)' do
       sig = context.ecdsa_sign(ex.message_hash, ex.secret_key, :rfc6979)
       expect(sig).to eq ex.signature_rfc6979
     end
