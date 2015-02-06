@@ -85,12 +85,20 @@ describe Secp256k1::Argument::NonceFunction do
     arg.for_ffi.call(nil, nil, nil, 4, nil)
   end
 
-  it 'converts :default to secp256k1_nonce_function_default'
+  it 'converts :default to secp256k1_nonce_function_default' do
+    arg = described_class.new(:default)
+    expect(arg.for_ffi).to eq Secp256k1::ForeignLibrary.secp256k1_nonce_function_default
+  end
 
+  it 'converts nil to secp256k1_nonce_function_default also' do
+    arg = described_class.new(nil)
+    expect(arg.for_ffi).to eq Secp256k1::ForeignLibrary.secp256k1_nonce_function_default
+  end
 
-  it 'converts nil to secp256k1_nonce_function_default also'
-
-  it 'converts :rfc6979 to secp256k1_nonce_function_rfc6979'
+  it 'converts :rfc6979 to secp256k1_nonce_function_rfc6979' do
+    arg = described_class.new(:rfc6979)
+    expect(arg.for_ffi).to eq Secp256k1::ForeignLibrary.secp256k1_nonce_function_rfc6979
+  end
 
 end
 

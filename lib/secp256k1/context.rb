@@ -10,6 +10,7 @@ module Secp256k1
       flags |= ForeignLibrary::SECP256K1_START_SIGN if opts[:sign]
 
       pointer = @lib.secp256k1_context_create(flags)
+
       destroyer = @lib.method(:secp256k1_context_destroy)
       @ptr = FFI::AutoPointer.new(pointer, destroyer)
     end
@@ -23,9 +24,16 @@ module Secp256k1
       result = @lib.secp256k1_ecdsa_sign(@ptr, msg32.for_ffi, sig.pointer,
         sig.size_pointer, seckey.for_ffi, noncefp.for_ffi, nil)
 
-      # TODO: check_signing_result(result)
-
-      sig.value
+      case result
+      when 0
+        # the nonce generation function failed
+        nil
+      when 1
+        # signature created
+        sig.value
+      else
+        raise 'unexpected result from secp256k1_ecdsa_sign'
+      end
     end
 
     def ecdsa_verify(msg32, sig, pubkey)

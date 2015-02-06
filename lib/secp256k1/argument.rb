@@ -25,6 +25,10 @@ module Secp256k1
         case noncefp
         when Proc
           @fp = wrapper_proc(noncefp)
+        when :default, nil
+          @fp = ForeignLibrary.secp256k1_nonce_function_default
+        when :rfc6979
+          @fp = ForeignLibrary.secp256k1_nonce_function_rfc6979
         else
           raise ArgumentError, "invalid noncefp"
         end

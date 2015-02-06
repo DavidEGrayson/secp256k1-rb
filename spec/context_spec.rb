@@ -42,9 +42,32 @@ describe 'Secp256k1::Context integration tests' do
     let(:ex) { ExampleSig1 }
     let(:nonce_spec) { Proc.new { ex.nonce } }
 
-    it 'gives the right signature' do
-      sig = context.ecdsa_sign(ex.message_hash, ex.secret_key, nonce_spec)
+    it 'gives the right signature (default algorithm)' do
+      sig = context.ecdsa_sign(ex.message_hash, ex.secret_key, :default)
+      expect(sig).to eq ex.signature_nonce_default
+    end
+
+    it 'gives the right signature (rfc6979)' do
+      sig = context.ecdsa_sign(ex.message_hash, ex.secret_key, :rfc6979)
+      expect(sig).to eq ex.signature_rfc6979
+    end
+
+    it 'gives the right signature (arbitrary nonce)' do
+      nonce_proc = Proc.new { ex.nonce }
+      sig = context.ecdsa_sign(ex.message_hash, ex.secret_key, nonce_proc)
       expect(sig).to eq ex.signature
+    end
+
+    it 'returns nil if the nonce proc returns nil' do
+      nonce_proc = Proc.new { }
+      sig = context.ecdsa_sign(ex.message_hash, ex.secret_key, nonce_proc)
+      expect(sig).to eq nil
+    end
+
+    it 'allows the nonce proc to raise exceptions' do
+      nonce_proc = Proc.new { raise 'hi' }
+      expect { context.ecdsa_sign(ex.message_hash, ex.secret_key, nonce_proc) }
+        .to raise_error 'hi'
     end
   end
 

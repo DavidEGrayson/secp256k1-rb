@@ -9,10 +9,26 @@ module Secp256k1
 
     MAX_SIGNATURE_SIZE = 72
 
+    ffi_lib 'secp256k1'
+
+    lib = ffi_libraries.first
+
     # This corresponds to secp256k1_nonce_function_t in secp256k1.h.
     callback :nonce_function, [:pointer, :pointer, :pointer, :uint, :pointer], :int
 
-    ffi_lib 'secp256k1'
+    default = lib.find_variable('secp256k1_nonce_function_default')
+    @nonce_function_default = default.read_pointer
+
+    default = lib.find_variable('secp256k1_nonce_function_rfc6979')
+    @nonce_function_rfc6979 = default.read_pointer
+
+    def self.secp256k1_nonce_function_default
+      @nonce_function_default
+    end
+
+    def self.secp256k1_nonce_function_rfc6979
+      @nonce_function_rfc6979
+    end
 
     msg32_type = :buffer_in
     ctx_const_type = :pointer
