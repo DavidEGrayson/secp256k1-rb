@@ -21,8 +21,8 @@ module Secp256k1
       noncefp = Argument::NonceFunction.new(noncefp)
       sig = Argument::SignatureOut.new
 
-      result = @lib.secp256k1_ecdsa_sign(@ptr, msg32.for_ffi, sig.pointer,
-        sig.size_pointer, seckey.for_ffi, noncefp.for_ffi, nil)
+      result = @lib.secp256k1_ecdsa_sign(@ptr, msg32.string, sig.pointer,
+        sig.size_pointer, seckey.string, noncefp.func, nil)
 
       case result
       when 0
@@ -38,7 +38,7 @@ module Secp256k1
 
     def ecdsa_verify(msg32, sig, pubkey)
       msg32 = Argument::MessageHash.new(msg32)
-      @lib.secp256k1_ecdsa_verify(@ptr, msg32.for_ffi, sig, sig.bytesize, pubkey, pubkey.bytesize)
+      @lib.secp256k1_ecdsa_verify(@ptr, msg32.string, sig, sig.bytesize, pubkey, pubkey.bytesize)
     end
   end
 end

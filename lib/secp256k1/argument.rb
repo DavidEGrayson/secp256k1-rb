@@ -3,6 +3,8 @@ require 'ffi'
 module Secp256k1
   module Argument
     class MessageHash
+      attr_reader :string
+
       def initialize(msg32)
         if !msg32.is_a?(String)
           raise ArgumentError, 'msg32 must be a string'
@@ -12,30 +14,24 @@ module Secp256k1
           raise ArgumentError, 'msg32 must be 32 bytes long'
         end
 
-        @msg32 = msg32
-      end
-
-      def for_ffi
-        @msg32
+        @string = msg32
       end
     end
 
     class NonceFunction
-      def initialize(noncefp)
-        case noncefp
-        when Proc
-          @fp = wrapper_proc(noncefp)
-        when :default, nil
-          @fp = ForeignLibrary.secp256k1_nonce_function_default
-        when :rfc6979
-          @fp = ForeignLibrary.secp256k1_nonce_function_rfc6979
-        else
-          raise ArgumentError, "invalid noncefp"
-        end
-      end
+      attr_reader :func
 
-      def for_ffi
-        @fp
+      def initialize(noncefp)
+        @func = case noncefp
+                when Proc
+                  wrapper_proc(noncefp)
+                when :default, nil
+                  ForeignLibrary.secp256k1_nonce_function_default
+                when :rfc6979
+                  ForeignLibrary.secp256k1_nonce_function_rfc6979
+                else
+                  raise ArgumentError, "invalid noncefp"
+                end
       end
 
       private
@@ -60,9 +56,9 @@ module Secp256k1
     end
 
     class SecretKeyIn
-      def initialize(seckey)
-        @seckey = seckey
+      attr_reader :string
 
+      def initialize(seckey)
         if !seckey.is_a?(String)
           raise ArgumentError, 'seckey must be a string'
         end
@@ -70,10 +66,8 @@ module Secp256k1
         if seckey.bytesize != 32
           raise ArgumentError, 'seckey must be 32 bytes long'
         end
-      end
 
-      def for_ffi
-        @seckey
+        @string = seckey
       end
     end
 

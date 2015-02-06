@@ -4,7 +4,7 @@ describe Secp256k1::Argument::MessageHash do
   it 'lets 32-byte strings pass through' do
     str = "\x00" * 32
     arg = described_class.new(str)
-    expect(arg.for_ffi).to eql str
+    expect(arg.string).to eql str
   end
 
   it 'raises an ArgumentError if the arg is not a string' do
@@ -28,7 +28,7 @@ describe Secp256k1::Argument::NonceFunction do
         @arg_n_to_proc = n
         @wrapped_proc_return
       end
-      @wrapper_proc = described_class.new(@proc).for_ffi
+      @wrapper_proc = described_class.new(@proc).func
     end
 
     it 'is a Proc' do
@@ -77,27 +77,27 @@ describe Secp256k1::Argument::NonceFunction do
       expect { @wrapper_proc.call(nil, nil, nil, 4, nil) }
         .to raise_error 'nonce must be a string'
     end
-   end
+  end
 
   it 'accepts procs' do
     proc = Proc.new { }
     arg = described_class.new(proc)
-    arg.for_ffi.call(nil, nil, nil, 4, nil)
+    arg.func.call(nil, nil, nil, 4, nil)
   end
 
   it 'converts :default to secp256k1_nonce_function_default' do
     arg = described_class.new(:default)
-    expect(arg.for_ffi).to eq Secp256k1::ForeignLibrary.secp256k1_nonce_function_default
+    expect(arg.func).to eq Secp256k1::ForeignLibrary.secp256k1_nonce_function_default
   end
 
   it 'converts nil to secp256k1_nonce_function_default also' do
     arg = described_class.new(nil)
-    expect(arg.for_ffi).to eq Secp256k1::ForeignLibrary.secp256k1_nonce_function_default
+    expect(arg.func).to eq Secp256k1::ForeignLibrary.secp256k1_nonce_function_default
   end
 
   it 'converts :rfc6979 to secp256k1_nonce_function_rfc6979' do
     arg = described_class.new(:rfc6979)
-    expect(arg.for_ffi).to eq Secp256k1::ForeignLibrary.secp256k1_nonce_function_rfc6979
+    expect(arg.func).to eq Secp256k1::ForeignLibrary.secp256k1_nonce_function_rfc6979
   end
 
 end
@@ -106,7 +106,7 @@ describe Secp256k1::Argument::SecretKeyIn do
   it 'lets 32-byte strings pass through' do
     str = "\x00" * 32
     arg = described_class.new(str)
-    expect(arg.for_ffi).to eql str
+    expect(arg.string).to eql str
   end
 
   it 'raises an ArgumentError if arg is not a string' do
