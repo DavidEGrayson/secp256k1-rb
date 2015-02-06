@@ -18,24 +18,6 @@ describe Secp256k1::Argument::MessageHash do
   end
 end
 
-describe Secp256k1::Argument::SecretKeyIn do
-  it 'lets 32-byte strings pass through' do
-    str = "\x00" * 32
-    arg = described_class.new(str)
-    expect(arg.for_ffi).to eql str
-  end
-
-  it 'raises an ArgumentError if arg is not a string' do
-    expect { described_class.new(1234) }
-      .to raise_error ArgumentError, 'seckey must be a string'
-  end
-
-  it 'raises an ArgumentError if arg is not 32 bytes' do
-    expect { described_class.new("\x00" * 31) }
-      .to raise_error ArgumentError, 'seckey must be 32 bytes long'
-  end
-end
-
 describe Secp256k1::Argument::NonceFunction do
   describe 'wrapper proc' do
     before do
@@ -58,7 +40,7 @@ describe Secp256k1::Argument::NonceFunction do
     end
 
     it 'passes the 4th argument (attempt number) to the wrapped proc' do
-      @wrapper_proc.call(@nonce_buffer, nil, nil, 4, nil)
+      @wrapper_proc.call(nil, nil, nil, 4, nil)
       expect(@arg_n_to_proc).to eq 4
     end
 
@@ -97,14 +79,56 @@ describe Secp256k1::Argument::NonceFunction do
     end
    end
 
-  it 'accepts procs'
-
-  it 'accepts methods'
+  it 'accepts procs' do
+    proc = Proc.new { }
+    arg = described_class.new(proc)
+    arg.for_ffi.call(nil, nil, nil, 4, nil)
+  end
 
   it 'converts :default to secp256k1_nonce_function_default'
+
 
   it 'converts nil to secp256k1_nonce_function_default also'
 
   it 'converts :rfc6979 to secp256k1_nonce_function_rfc6979'
 
+end
+
+describe Secp256k1::Argument::SecretKeyIn do
+  it 'lets 32-byte strings pass through' do
+    str = "\x00" * 32
+    arg = described_class.new(str)
+    expect(arg.for_ffi).to eql str
+  end
+
+  it 'raises an ArgumentError if arg is not a string' do
+    expect { described_class.new(1234) }
+      .to raise_error ArgumentError, 'seckey must be a string'
+  end
+
+  it 'raises an ArgumentError if arg is not 32 bytes' do
+    expect { described_class.new("\x00" * 31) }
+      .to raise_error ArgumentError, 'seckey must be 32 bytes long'
+  end
+end
+
+describe Secp256k1::Argument::SignatureOut do
+  subject(:arg) { described_class.new }
+
+  it 'makes a 72-byte buffer for ffi' do
+    expect(arg.pointer).to be_a FFI::MemoryPointer
+    expect(arg.pointer.size).to eq 72
+  end
+
+  it 'makes a pointer to the int 72' do
+    expect(arg.size_pointer).to be_a FFI::MemoryPointer
+    expect(arg.size_pointer.read_int).to eq 72
+  end
+
+  it 'converts the buffer to a string for ruby' do
+    str = 'satoshi'
+    arg.pointer.put_bytes(0, str)
+    arg.size_pointer.write_int(str.bytesize)
+    expect(arg.value).to eq str
+  end
 end

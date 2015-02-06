@@ -18,17 +18,14 @@ module Secp256k1
       msg32 = Argument::MessageHash.new(msg32)
       seckey = Argument::SecretKeyIn.new(seckey)
       noncefp = Argument::NonceFunction.new(noncefp)
+      sig = Argument::SignatureOut.new
 
-      sig_buf = FFI::MemoryPointer.new(:uchar, ForeignLibrary::MAX_SIGNATURE_SIZE)
-      sig_size = FFI::MemoryPointer.new(:int)
-      sig_size.write_int(ForeignLibrary::MAX_SIGNATURE_SIZE)
-
-      result = @lib.secp256k1_ecdsa_sign(@ptr, msg32.for_ffi, sig_buf, sig_size,
-                                         seckey.for_ffi, noncefp.for_ffi, nil)
+      result = @lib.secp256k1_ecdsa_sign(@ptr, msg32.for_ffi, sig.pointer,
+        sig.size_pointer, seckey.for_ffi, noncefp.for_ffi, nil)
 
       # TODO: check_signing_result(result)
 
-      sig_buf.read_string(sig_size.read_int)
+      sig.value
     end
 
     def ecdsa_verify(msg32, sig, pubkey)

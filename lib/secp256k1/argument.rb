@@ -1,3 +1,5 @@
+require 'ffi'
+
 module Secp256k1
   module Argument
     class MessageHash
@@ -15,24 +17,6 @@ module Secp256k1
 
       def for_ffi
         @msg32
-      end
-    end
-
-    class SecretKeyIn
-      def initialize(seckey)
-        @seckey = seckey
-
-        if !seckey.is_a?(String)
-          raise ArgumentError, 'seckey must be a string'
-        end
-
-        if seckey.bytesize != 32
-          raise ArgumentError, 'seckey must be 32 bytes long'
-        end
-      end
-
-      def for_ffi
-        @seckey
       end
     end
 
@@ -68,6 +52,39 @@ module Secp256k1
             raise 'nonce must be a string'
           end
         end
+      end
+    end
+
+    class SecretKeyIn
+      def initialize(seckey)
+        @seckey = seckey
+
+        if !seckey.is_a?(String)
+          raise ArgumentError, 'seckey must be a string'
+        end
+
+        if seckey.bytesize != 32
+          raise ArgumentError, 'seckey must be 32 bytes long'
+        end
+      end
+
+      def for_ffi
+        @seckey
+      end
+    end
+
+    class SignatureOut
+      attr_reader :pointer
+      attr_reader :size_pointer
+
+      def initialize
+        @pointer = FFI::MemoryPointer.new(:uchar, ForeignLibrary::MAX_SIGNATURE_SIZE)
+        @size_pointer = FFI::MemoryPointer.new(:int)
+        @size_pointer.write_int(ForeignLibrary::MAX_SIGNATURE_SIZE)
+      end
+
+      def value
+        @pointer.read_string(@size_pointer.read_int)
       end
     end
   end
