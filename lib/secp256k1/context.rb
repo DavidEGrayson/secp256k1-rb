@@ -104,6 +104,11 @@ module Secp256k1
       end
     end
 
+    def ec_seckey_verify(seckey)
+      seckey = Argument::SecretKeyIn.new(seckey)
+      @lib.secp256k1_ec_seckey_verify(self, seckey.string)
+    end
+
     # This is not part of the public API of the gem.  It may change in
     # the future without notice.  This method makes it so we can pass
     # a Context object to FFI and it automatically converts it to a
