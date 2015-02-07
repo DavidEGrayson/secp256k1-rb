@@ -1,10 +1,15 @@
 #!/usr/bin/env ruby
 
+# This script starts a REPL session with the secp256k1 library already
+# loaded.  For convenience, it makes a fully-initialized
+# Secp256k1::Context object that you can access as a local variable
+# named c.
+
 $LOAD_PATH << 'lib'
 require 'secp256k1'
-C = Secp256k1::Context.new(sign: true, verify: true)
+c = Secp256k1::Context.new(sign: true, verify: true)
 
 require_relative 'spec/hex_inspect'
 
-require 'irb'
-IRB.start
+require 'ripl'
+Ripl.start binding: binding
