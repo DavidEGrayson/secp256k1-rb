@@ -1,5 +1,28 @@
 require 'spec_helper'
 
+describe Secp256k1::Argument::StringIn do
+  it 'raises an ArgumentError if the arg is not a string' do
+    expect { described_class.new(1234, :foo) }
+      .to raise_error ArgumentError, 'foo must be a string'
+  end
+
+  describe 'with specific length' do
+    let(:length) { 44 }
+    let(:opts) { { length: length } }
+
+    it 'lets strings with the right length pass through' do
+      str = "\x00" * length
+      arg = described_class.new(str, :foo, opts)
+      expect(arg.string).to eql str
+    end
+
+    it 'raises an ArgumentError if arg is not 32 bytes' do
+      expect { described_class.new("\x00" * 31, :foo, opts) }
+        .to raise_error ArgumentError, 'foo must be 32 bytes long'
+    end
+  end
+end
+
 describe Secp256k1::Argument::MessageHash do
   it 'lets 32-byte strings pass through' do
     str = "\x00" * 32
@@ -116,6 +139,19 @@ describe Secp256k1::Argument::NonceOut do
   end
 end
 
+describe Secp256k1::Argument::RecidOut do
+  subject(:arg) { described_class.new }
+
+  it 'makes pointer for an int' do
+    expect(arg.pointer).to be_a FFI::MemoryPointer
+    expect(arg.pointer.size).to eq FFI.type_size(FFI::Type::INT)
+  end
+
+  it 'can get the value from the pointer' do
+    arg.pointer.write_int(0x0addbeef)
+    expect(arg.value).to eq 0x0addbeef
+  end
+end
 
 describe Secp256k1::Argument::SecretKeyIn do
   it 'lets 32-byte strings pass through' do
@@ -132,6 +168,21 @@ describe Secp256k1::Argument::SecretKeyIn do
   it 'raises an ArgumentError if arg is not 32 bytes' do
     expect { described_class.new("\x00" * 31) }
       .to raise_error ArgumentError, 'seckey must be 32 bytes long'
+  end
+end
+
+describe Secp256k1::Argument::SignatureCompactOut do
+  subject(:arg) { described_class.new }
+
+  it 'makes a 64-byte buffer for ffi' do
+    expect(arg.pointer).to be_a FFI::MemoryPointer
+    expect(arg.pointer.size).to eq 64
+  end
+
+  it 'converts the buffer to a string for ruby' do
+    str = 'abcdefgh' * 8
+    arg.pointer.put_bytes(0, str)
+    expect(arg.value).to eq str
   end
 end
 

@@ -48,7 +48,30 @@ module Secp256k1
         # signature created
         sig.value
       else
-        raise 'unexpected result from secp256k1_ecdsa_sign'
+        raise 'unexpected result'
+      end
+    end
+
+    def ecdsa_sign_compact(msg32, seckey, noncefp = :default)
+      msg32 = Argument::MessageHash.new(msg32)
+      seckey = Argument::SecretKeyIn.new(seckey)
+      noncefp = Argument::NonceFunction.new(noncefp)
+
+      sig = Argument::SignatureCompactOut.new
+      recid = Argument::RecidOut.new
+
+      result = @lib.secp256k1_ecdsa_sign_compact(self, msg32.string,
+        sig.pointer, seckey.string, noncefp.func, nil, recid.pointer)
+
+      case result
+      when 0
+        # the nonce generation function failed
+        nil
+      when 1
+        # signature created
+        [sig.value, recid.value]
+      else
+        raise 'unexpected result'
       end
     end
 

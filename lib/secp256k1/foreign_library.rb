@@ -7,7 +7,8 @@ module Secp256k1
     SECP256K1_START_VERIFY = (1 << 0)
     SECP256K1_START_SIGN   = (1 << 1)
 
-    MAX_SIGNATURE_SIZE = 72
+    MAX_SIGNATURE_LENGTH = 72
+    COMPACT_SIGNATURE_LENGTH = 64
 
     ffi_lib 'secp256k1'
 

@@ -98,14 +98,38 @@ module Secp256k1
       end
     end
 
+    class RecidOut
+      attr_reader :pointer
+
+      def initialize
+        @pointer = FFI::MemoryPointer.new(:int)
+      end
+
+      def value
+        @pointer.read_int
+      end
+    end
+
+    class SignatureCompactOut
+      attr_reader :pointer
+
+      def initialize
+        @pointer = FFI::MemoryPointer.new(:uchar, ForeignLibrary::COMPACT_SIGNATURE_LENGTH)
+      end
+
+      def value
+        @pointer.read_string(ForeignLibrary::COMPACT_SIGNATURE_LENGTH)
+      end
+    end
+
     class SignatureOut
       attr_reader :pointer
       attr_reader :size_pointer
 
       def initialize
-        @pointer = FFI::MemoryPointer.new(:uchar, ForeignLibrary::MAX_SIGNATURE_SIZE)
+        @pointer = FFI::MemoryPointer.new(:uchar, ForeignLibrary::MAX_SIGNATURE_LENGTH)
         @size_pointer = FFI::MemoryPointer.new(:int)
-        @size_pointer.write_int(ForeignLibrary::MAX_SIGNATURE_SIZE)
+        @size_pointer.write_int(ForeignLibrary::MAX_SIGNATURE_LENGTH)
       end
 
       def value
