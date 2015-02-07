@@ -31,6 +31,32 @@ describe 'Secp256k1::Context unit tests' do
   end
 end
 
+describe 'Secp256k1::Context late initialization for signing' do
+  before(:all) do
+    @context = Secp256k1::Context.new
+    @context.initialize_sign
+  end
+
+  it 'can sign' do
+    ex = ExampleSig1
+    sig = @context.ecdsa_sign(ex.message_hash, ex.secret_key, :default)
+    expect(sig).to eq ex.signature_nonce_default
+  end
+end
+
+describe 'Secp256k1::Context late initialization for verifying' do
+  before(:all) do
+    @context = Secp256k1::Context.new
+    @context.initialize_verify
+  end
+
+  it 'can verify' do
+    ex = ExampleSig1
+    result = @context.ecdsa_verify(ex.message_hash, ex.signature, ex.public_key)
+    expect(result).to eq 1  # expect correct signature
+  end
+end
+
 describe 'Secp256k1::Context with signing enabled' do
   before(:all) do
     @context = Secp256k1::Context.new(sign: true)
