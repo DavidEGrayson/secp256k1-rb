@@ -23,6 +23,14 @@ module Secp256k1
       @lib.secp256k1_context_initialize_verify(self)
     end
 
+    def ecdsa_verify(msg32, sig, pubkey)
+      msg32 = Argument::MessageHash.new(msg32)
+      sig = Argument::SignatureIn.new(sig)
+      pubkey = Argument::PublicKeyIn.new(pubkey)
+      @lib.secp256k1_ecdsa_verify(self, msg32.string, sig.string, sig.length,
+        pubkey.string, pubkey.length)
+    end
+
     def ecdsa_sign(msg32, seckey, noncefp = :default)
       msg32 = Argument::MessageHash.new(msg32)
       seckey = Argument::SecretKeyIn.new(seckey)
@@ -42,14 +50,6 @@ module Secp256k1
       else
         raise 'unexpected result from secp256k1_ecdsa_sign'
       end
-    end
-
-    def ecdsa_verify(msg32, sig, pubkey)
-      msg32 = Argument::MessageHash.new(msg32)
-      sig = Argument::SignatureIn.new(sig)
-      pubkey = Argument::PublicKeyIn.new(pubkey)
-      @lib.secp256k1_ecdsa_verify(self, msg32.string, sig.string, sig.length,
-        pubkey.string, pubkey.length)
     end
 
     # This is not part of the public API of the gem.  It may change in

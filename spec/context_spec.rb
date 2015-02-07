@@ -128,7 +128,7 @@ describe 'Secp256k1::Context with verifying enabled' do
       expect(result).to eq 0
     end
 
-    it 'returns -1 for bad public keys' do
+    it 'returns -1 for invalid public keys' do
       result = context.ecdsa_verify(ex.message_hash, ex.signature, 'junk')
       expect(result).to eq -1
     end
