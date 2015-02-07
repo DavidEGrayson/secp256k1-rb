@@ -1,7 +1,7 @@
 # coding: ascii-8bit
 
 require 'coveralls'
-Coveralls.wear!
+Coveralls.wear! if Coveralls.will_run?
 
 require 'secp256k1'
 require 'ostruct'
