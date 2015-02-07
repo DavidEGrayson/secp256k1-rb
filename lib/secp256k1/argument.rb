@@ -47,6 +47,39 @@ module Secp256k1
       end
     end
 
+    class SignatureCompactIn < StringIn
+      def initialize(sig64)
+        super sig64, :sig64, length: 64
+      end
+    end
+
+    class VarStringOut
+      attr_reader :pointer
+      attr_reader :size_pointer
+
+      def initialize(max_length)
+        @pointer = FFI::MemoryPointer.new(:uchar, max_length)
+        @size_pointer = FFI::MemoryPointer.new(:int)
+        @size_pointer.write_int(max_length)
+      end
+
+      def value
+        @pointer.read_string(@size_pointer.read_int)
+      end
+    end
+
+    class SignatureOut < VarStringOut
+      def initialize
+        super ForeignLibrary::MAX_SIGNATURE_LENGTH
+      end
+    end
+
+    class PublicKeyOut < VarStringOut
+      def initialize
+        super 65
+      end
+    end
+
     class NonceFunction
       attr_reader :func
 
@@ -119,21 +152,6 @@ module Secp256k1
 
       def value
         @pointer.read_string(ForeignLibrary::COMPACT_SIGNATURE_LENGTH)
-      end
-    end
-
-    class SignatureOut
-      attr_reader :pointer
-      attr_reader :size_pointer
-
-      def initialize
-        @pointer = FFI::MemoryPointer.new(:uchar, ForeignLibrary::MAX_SIGNATURE_LENGTH)
-        @size_pointer = FFI::MemoryPointer.new(:int)
-        @size_pointer.write_int(ForeignLibrary::MAX_SIGNATURE_LENGTH)
-      end
-
-      def value
-        @pointer.read_string(@size_pointer.read_int)
       end
     end
   end

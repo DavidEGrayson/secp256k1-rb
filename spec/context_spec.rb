@@ -52,7 +52,7 @@ describe 'Secp256k1::Context late initialization for verifying' do
 
   it 'can verify' do
     ex = ExampleSig1
-    result = @context.ecdsa_verify(ex.message_hash, ex.signature, ex.public_key)
+    result = @context.ecdsa_verify(ex.message_hash, ex.signature, ex.pubkey)
     expect(result).to eq 1  # expect correct signature
   end
 end
@@ -144,17 +144,17 @@ describe 'Secp256k1::Context with verifying enabled' do
     let(:ex) { ExampleSig1 }
 
     it 'can verify a correct signature with low S value' do
-      result = context.ecdsa_verify(ex.message_hash, ex.signature, ex.public_key)
+      result = context.ecdsa_verify(ex.message_hash, ex.signature, ex.pubkey)
       expect(result).to eq 1  # expect correct signature
     end
 
     it 'can verify a correct signature with high S value' do
-      result = context.ecdsa_verify(ex.message_hash, ex.signature_alt, ex.public_key)
+      result = context.ecdsa_verify(ex.message_hash, ex.signature_alt, ex.pubkey)
       expect(result).to eq 1  # expect correct signature
     end
 
     it 'returns 1 for incorrect signatures' do
-      result = context.ecdsa_verify(ex.message_hash, ex.signature.succ, ex.public_key)
+      result = context.ecdsa_verify(ex.message_hash, ex.signature.succ, ex.pubkey)
       expect(result).to eq 0
     end
 
@@ -164,8 +164,29 @@ describe 'Secp256k1::Context with verifying enabled' do
     end
 
     it 'returns -2 for invalid signatures' do
-      result = context.ecdsa_verify(ex.message_hash, 'junk', ex.public_key)
+      result = context.ecdsa_verify(ex.message_hash, 'junk', ex.pubkey)
       expect(result).to eq -2
+    end
+  end
+
+  describe 'ecdsa_recover_compact' do
+    let(:ex) { ExampleSig1 }
+
+    it 'can recover public key from a compact signature (uncompressed)' do
+      sig64, recid = ex.signature_compact
+      pubkey = context.ecdsa_recover_compact(ex.message_hash, sig64, false, recid)
+      expect(pubkey).to eq ex.pubkey_uncompressed
+    end
+
+    it 'can recover public key from a compact signature (compressed)' do
+      sig64, recid = ex.signature_compact
+      pubkey = context.ecdsa_recover_compact(ex.message_hash, sig64, true, recid)
+      expect(pubkey).to eq ex.pubkey
+    end
+
+    it 'returs nil if something is wrong' do
+      pubkey = context.ecdsa_recover_compact(ex.message_hash, "\x00" * 64, true, 0)
+      expect(pubkey).to eq nil
     end
   end
 end

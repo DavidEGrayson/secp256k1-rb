@@ -23,24 +23,6 @@ describe Secp256k1::Argument::StringIn do
   end
 end
 
-describe Secp256k1::Argument::MessageHash do
-  it 'lets 32-byte strings pass through' do
-    str = "\x00" * 32
-    arg = described_class.new(str)
-    expect(arg.string).to eql str
-  end
-
-  it 'raises an ArgumentError if the arg is not a string' do
-    expect { described_class.new(1234) }
-      .to raise_error ArgumentError, 'msg32 must be a string'
-  end
-
-  it 'raises an ArgumentError if arg is not 32 bytes' do
-    expect { described_class.new("\x00" * 31) }
-      .to raise_error ArgumentError, 'msg32 must be 32 bytes long'
-  end
-end
-
 describe Secp256k1::Argument::NonceFunction do
   describe 'wrapper proc' do
     before do
@@ -153,24 +135,6 @@ describe Secp256k1::Argument::RecidOut do
   end
 end
 
-describe Secp256k1::Argument::SecretKeyIn do
-  it 'lets 32-byte strings pass through' do
-    str = "\x00" * 32
-    arg = described_class.new(str)
-    expect(arg.string).to eql str
-  end
-
-  it 'raises an ArgumentError if arg is not a string' do
-    expect { described_class.new(1234) }
-      .to raise_error ArgumentError, 'seckey must be a string'
-  end
-
-  it 'raises an ArgumentError if arg is not 32 bytes' do
-    expect { described_class.new("\x00" * 31) }
-      .to raise_error ArgumentError, 'seckey must be 32 bytes long'
-  end
-end
-
 describe Secp256k1::Argument::SignatureCompactOut do
   subject(:arg) { described_class.new }
 
@@ -197,6 +161,28 @@ describe Secp256k1::Argument::SignatureOut do
   it 'makes a pointer to the int 72' do
     expect(arg.size_pointer).to be_a FFI::MemoryPointer
     expect(arg.size_pointer.read_int).to eq 72
+  end
+
+  it 'converts the buffer to a string for ruby' do
+    str = 'satoshi'
+    arg.pointer.put_bytes(0, str)
+    arg.size_pointer.write_int(str.bytesize)
+    expect(arg.value).to eq str
+  end
+end
+
+describe Secp256k1::Argument::VarStringOut do
+  let(:length) { 22 }
+  subject(:arg) { described_class.new(length) }
+
+  it 'makes a buffer for ffi with the right length' do
+    expect(arg.pointer).to be_a FFI::MemoryPointer
+    expect(arg.pointer.size).to eq length
+  end
+
+  it 'makes a pointer to an int holding the length' do
+    expect(arg.size_pointer).to be_a FFI::MemoryPointer
+    expect(arg.size_pointer.read_int).to eq length
   end
 
   it 'converts the buffer to a string for ruby' do

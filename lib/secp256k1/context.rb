@@ -75,6 +75,35 @@ module Secp256k1
       end
     end
 
+    def ecdsa_recover_compact(msg32, sig64, compressed, recid)
+      msg32 = Argument::MessageHash.new(msg32)
+      sig64 = Argument::SignatureCompactIn.new(sig64)
+
+      if ![true, false, nil].include?(compressed)
+        raise 'compressed must be true, false, or nil'
+      end
+      compressed = compressed ? 1 : 0
+
+      raise 'recid must be an integer' if !recid.is_a?(Integer)
+
+      pubkey = Argument::PublicKeyOut.new
+
+      result = @lib.secp256k1_ecdsa_recover_compact(self,
+        msg32.string, sig64.string, pubkey.pointer, pubkey.size_pointer,
+        compressed, recid)
+
+      case result
+      when 0
+        # something went wrong
+        nil
+      when 1
+        # public key successfully recovered (which guarantees a correct signature)
+        pubkey.value
+      else
+        raise 'unexpected result'
+      end
+    end
+
     # This is not part of the public API of the gem.  It may change in
     # the future without notice.  This method makes it so we can pass
     # a Context object to FFI and it automatically converts it to a
