@@ -31,9 +31,7 @@ Until these issues are resolved, the installation instructions below will not wo
 If you are using Mac OS X and Homebrew, run these commands to install required development tools:
 
 ````
-$ brew install autoconf
-$ brew install automake
-$ brew install libtool
+$ brew install autoconf automake libtool
 ````
 
 Then download and install the library:
