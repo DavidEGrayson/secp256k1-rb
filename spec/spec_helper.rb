@@ -6,6 +6,8 @@ Coveralls.wear! if Coveralls.will_run?
 require 'secp256k1'
 require 'ostruct'
 
+require_relative 'hex_inspect'
+
 RSpec.configure do |config|
   config.expect_with :rspec do |expectations|
     # This option will default to `true` in RSpec 4. It makes the `description`
@@ -23,12 +25,6 @@ RSpec.configure do |config|
     # a real object. This is generally recommended, and will default to
     # `true` in RSpec 4.
     mocks.verify_partial_doubles = true
-  end
-end
-
-class String
-  def hex_inspect
-    '"' + each_byte.map { |b| '\x%02x' % b }.join + '"'
   end
 end
 
