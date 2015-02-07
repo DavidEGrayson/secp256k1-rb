@@ -6,8 +6,8 @@ describe 'Secp256k1::Context unit tests' do
 
   let(:lib) do
     d = double('lib')
-    d.stub(:secp256k1_context_destroy) { |ptr| }
-    d.stub(:secp256k1_context_create) { FFI::Pointer.new(0) }
+    allow(d).to receive(:secp256k1_context_destroy) { |ptr| }
+    allow(d).to receive(:secp256k1_context_create) { FFI::Pointer.new(0) }
     d
   end
 
