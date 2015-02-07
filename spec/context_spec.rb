@@ -31,9 +31,9 @@ describe 'Secp256k1::Context unit tests' do
   end
 end
 
-describe 'Secp256k1::Context integration tests' do
+describe 'Secp256k1::Context with signing enabled' do
   before(:all) do
-    @context = Secp256k1::Context.new(verify: true, sign: true)
+    @context = Secp256k1::Context.new(sign: true)
   end
 
   let(:context) { @context }
@@ -75,6 +75,14 @@ describe 'Secp256k1::Context integration tests' do
         .to raise_error 'hi'
     end
   end
+end
+
+describe 'Secp256k1::Context with verifying enabled' do
+  before(:all) do
+    @context = Secp256k1::Context.new(verify: true)
+  end
+
+  let(:context) { @context }
 
   describe 'ecdsa_verify' do
     let(:ex) { ExampleSig1 }
