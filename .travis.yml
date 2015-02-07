@@ -17,3 +17,4 @@ before_script:
   - ./configure
   - make
   - sudo make install
+  - sudo bash -c 'cat /usr/local/lib > /etc/ld.so.conf.d/local.conf'
