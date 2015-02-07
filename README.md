@@ -4,7 +4,7 @@
 
 # secp256k1: a Ruby wrapper for libsecp256k1
 
-This Ruby gem wraps [libsecp256k1](https://github.com/bitcoin/secp256k1), an optimized C library for EC operations on the secp256k1 curve.  The C library was originally written by Peter Wiulle for Bitcoin Core.  This FFI wrapper was originally written by Andy Alness and gemified by Micah Winkelspecht.
+This Ruby gem wraps [libsecp256k1](https://github.com/bitcoin/secp256k1), an optimized C library for EC operations on the secp256k1 curve.  The C library was originally written by Peter Wiulle for Bitcoin Core.  This wrapper was originally written by Andy Alness, originally gemified by Micah Winkelspecht, and is currently being developed by [David Grayson](https://github.com/DavidEGrayson).
 
 Features of this wrapper (which have not all been achieved yet):
 
