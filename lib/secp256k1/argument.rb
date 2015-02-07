@@ -2,19 +2,48 @@ require 'ffi'
 
 module Secp256k1
   module Argument
-    class MessageHash
+    class StringIn
       attr_reader :string
 
+      def initialize(string, name, opts={})
+        if !string.is_a?(String)
+          raise ArgumentError, "#{name} must be a string"
+        end
+
+        if opts[:length] && string.bytesize != opts[:length]
+          raise ArgumentError, "#{name} must be 32 bytes long"
+        end
+
+        @string = string
+        @name = name
+      end
+
+      def length
+        @string.length
+      end
+    end
+
+    class MessageHash < StringIn
       def initialize(msg32)
-        if !msg32.is_a?(String)
-          raise ArgumentError, 'msg32 must be a string'
-        end
+        super msg32, :msg32, length: 32
+      end
+    end
 
-        if msg32.bytesize != 32
-          raise ArgumentError, 'msg32 must be 32 bytes long'
-        end
+    class SecretKeyIn < StringIn
+      def initialize(seckey)
+        super seckey, :seckey, length: 32
+      end
+    end
 
-        @string = msg32
+    class SignatureIn < StringIn
+      def initialize(sig)
+        super sig, :sig
+      end
+    end
+
+    class PublicKeyIn < StringIn
+      def initialize(pubkey)
+        super pubkey, :pubkey
       end
     end
 
@@ -66,22 +95,6 @@ module Secp256k1
 
       def value
         @pointer.read_string(32)
-      end
-    end
-
-    class SecretKeyIn
-      attr_reader :string
-
-      def initialize(seckey)
-        if !seckey.is_a?(String)
-          raise ArgumentError, 'seckey must be a string'
-        end
-
-        if seckey.bytesize != 32
-          raise ArgumentError, 'seckey must be 32 bytes long'
-        end
-
-        @string = seckey
       end
     end
 

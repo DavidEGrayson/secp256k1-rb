@@ -46,7 +46,10 @@ module Secp256k1
 
     def ecdsa_verify(msg32, sig, pubkey)
       msg32 = Argument::MessageHash.new(msg32)
-      @lib.secp256k1_ecdsa_verify(self, msg32.string, sig, sig.bytesize, pubkey, pubkey.bytesize)
+      sig = Argument::SignatureIn.new(sig)
+      pubkey = Argument::PublicKeyIn.new(pubkey)
+      @lib.secp256k1_ecdsa_verify(self, msg32.string, sig.string, sig.length,
+        pubkey.string, pubkey.length)
     end
 
     # This is not part of the public API of the gem.  It may change in
