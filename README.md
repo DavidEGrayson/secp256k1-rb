@@ -1,4 +1,7 @@
-[![Build Status](https://travis-ci.org/GemHQ/secp256k1-rb.png)](https://travis-ci.org/GemHQ/secp256k1-rb) [![Coverage Status](https://img.shields.io/coveralls/GemHQ/secp256k1-rb.svg)](https://coveralls.io/r/GemHQ/secp256k1-rb) [![Code Climate](https://codeclimate.com/github/GemHQ/secp256k1-rb.png)](https://codeclimate.com/github/GemHQ/secp256k1-rb) [![Gem Version](https://badge.fury.io/rb/secp256k1.png)](http://badge.fury.io/rb/secp256k1)
+[![Build Status](https://travis-ci.org/DavidEGrayson/secp256k1-rb.png)](https://travis-ci.org/DavidEGrayson/secp256k1-rb)
+[![Coverage Status](https://img.shields.io/coveralls/DavidEGrayson/secp256k1-rb.svg)](https://coveralls.io/r/DavidEGrayson/secp256k1-rb)
+[![Code Climate](https://codeclimate.com/github/DavidEGrayson/secp256k1-rb.png)](https://codeclimate.com/github/DavidEGrayson/secp256k1-rb)
+[![Gem Version](https://badge.fury.io/rb/secp256k1.png)](http://badge.fury.io/rb/secp256k1)
 
 # secp256k1: a Ruby wrapper for libsecp256k1
 
