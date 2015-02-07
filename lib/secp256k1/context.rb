@@ -15,7 +15,7 @@ module Secp256k1
       @ptr = FFI::AutoPointer.new(pointer, destroyer)
     end
 
-    def ecdsa_sign(msg32, seckey, noncefp)
+    def ecdsa_sign(msg32, seckey, noncefp = :default)
       msg32 = Argument::MessageHash.new(msg32)
       seckey = Argument::SecretKeyIn.new(seckey)
       noncefp = Argument::NonceFunction.new(noncefp)

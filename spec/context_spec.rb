@@ -47,6 +47,11 @@ describe 'Secp256k1::Context integration tests' do
       expect(sig).to eq ex.signature_nonce_default
     end
 
+    it 'gives the right signature (no algorithm specified)' do
+      sig = context.ecdsa_sign(ex.message_hash, ex.secret_key)
+      expect(sig).to eq ex.signature_nonce_default
+    end
+
     it 'gives the right signature (rfc6979)' do
       sig = context.ecdsa_sign(ex.message_hash, ex.secret_key, :rfc6979)
       expect(sig).to eq ex.signature_rfc6979
