@@ -184,7 +184,7 @@ describe 'Secp256k1::Context with verifying enabled' do
       expect(pubkey).to eq ex.pubkey
     end
 
-    it 'returs nil if something is wrong' do
+    it 'returns nil if something is wrong' do
       pubkey = context.ecdsa_recover_compact(ex.message_hash, "\x00" * 64, true, 0)
       expect(pubkey).to eq nil
     end

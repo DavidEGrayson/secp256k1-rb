@@ -121,6 +121,22 @@ describe Secp256k1::Argument::NonceOut do
   end
 end
 
+describe Secp256k1::Argument::FixedStringOut do
+  let(:length) { 14 }
+  subject(:arg) { described_class.new(length) }
+
+  it 'makes a buffer wit the right length' do
+    expect(arg.pointer).to be_a FFI::MemoryPointer
+    expect(arg.pointer.size).to eq length
+  end
+
+  it 'converts the buffer to a string for ruby' do
+    str = 'a' * length
+    arg.pointer.put_bytes(0, str)
+    expect(arg.value).to eq str
+  end
+end
+
 describe Secp256k1::Argument::RecidOut do
   subject(:arg) { described_class.new }
 
@@ -132,42 +148,6 @@ describe Secp256k1::Argument::RecidOut do
   it 'can get the value from the pointer' do
     arg.pointer.write_int(0x0addbeef)
     expect(arg.value).to eq 0x0addbeef
-  end
-end
-
-describe Secp256k1::Argument::SignatureCompactOut do
-  subject(:arg) { described_class.new }
-
-  it 'makes a 64-byte buffer for ffi' do
-    expect(arg.pointer).to be_a FFI::MemoryPointer
-    expect(arg.pointer.size).to eq 64
-  end
-
-  it 'converts the buffer to a string for ruby' do
-    str = 'abcdefgh' * 8
-    arg.pointer.put_bytes(0, str)
-    expect(arg.value).to eq str
-  end
-end
-
-describe Secp256k1::Argument::SignatureOut do
-  subject(:arg) { described_class.new }
-
-  it 'makes a 72-byte buffer for ffi' do
-    expect(arg.pointer).to be_a FFI::MemoryPointer
-    expect(arg.pointer.size).to eq 72
-  end
-
-  it 'makes a pointer to the int 72' do
-    expect(arg.size_pointer).to be_a FFI::MemoryPointer
-    expect(arg.size_pointer.read_int).to eq 72
-  end
-
-  it 'converts the buffer to a string for ruby' do
-    str = 'satoshi'
-    arg.pointer.put_bytes(0, str)
-    arg.size_pointer.write_int(str.bytesize)
-    expect(arg.value).to eq str
   end
 end
 

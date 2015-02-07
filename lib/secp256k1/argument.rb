@@ -80,6 +80,26 @@ module Secp256k1
       end
     end
 
+    class FixedStringOut
+      attr_reader :pointer
+      attr_reader :length
+
+      def initialize(length)
+        @length = length
+        @pointer = FFI::MemoryPointer.new(:uchar, length)
+      end
+
+      def value
+        @pointer.read_string(length)
+      end
+    end
+
+    class SignatureCompactOut < FixedStringOut
+      def initialize
+        super ForeignLibrary::COMPACT_SIGNATURE_LENGTH
+      end
+    end
+
     class NonceFunction
       attr_reader :func
 
@@ -140,18 +160,6 @@ module Secp256k1
 
       def value
         @pointer.read_int
-      end
-    end
-
-    class SignatureCompactOut
-      attr_reader :pointer
-
-      def initialize
-        @pointer = FFI::MemoryPointer.new(:uchar, ForeignLibrary::COMPACT_SIGNATURE_LENGTH)
-      end
-
-      def value
-        @pointer.read_string(ForeignLibrary::COMPACT_SIGNATURE_LENGTH)
       end
     end
   end
