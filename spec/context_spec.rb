@@ -57,6 +57,52 @@ describe 'Secp256k1::Context late initialization for verifying' do
   end
 end
 
+describe 'Secp256k1::Context with nothing enabled' do
+  before(:all) do
+    @context = Secp256k1::Context.new
+  end
+
+  let(:context) { @context }
+
+  describe 'ec_seckey_verify' do
+    let(:ex) { ExampleSig1 }
+
+    it 'returns 1 for a valid secret key' do
+      result = context.ec_seckey_verify(ex.seckey)
+      expect(result).to eq 1
+    end
+
+    it 'returns 0 for an invalid key (all ones)' do
+      result = context.ec_seckey_verify("\xFF" * 32)
+      expect(result).to eq 0
+    end
+
+    it 'returns 0 for an invalid key (all zeros)' do
+      result = context.ec_seckey_verify("\x00" * 32)
+      expect(result).to eq 0
+    end
+  end
+
+  describe 'ec_pubkey_verify' do
+    let(:ex) { ExampleSig1 }
+
+    it 'returns 1 for a valid public key (compressed)' do
+      result = context.ec_pubkey_verify(ex.pubkey_compressed)
+      expect(result).to eq 1
+    end
+
+    it 'returns 1 for a valid public key (uncompressed)' do
+      result = context.ec_pubkey_verify(ex.pubkey_uncompressed)
+      expect(result).to eq 1
+    end
+
+    it 'returns 0 for an invalid public key' do
+      result = context.ec_pubkey_verify(ex.pubkey_uncompressed.succ)
+      expect(result).to eq 0
+    end
+  end
+end
+
 describe 'Secp256k1::Context with signing enabled' do
   before(:all) do
     @context = Secp256k1::Context.new(sign: true)
@@ -83,7 +129,7 @@ describe 'Secp256k1::Context with signing enabled' do
     end
 
     it 'gives the right signature (arbitrary nonce)' do
-      nonce_proc = Proc.new { ex.nonce }
+      nonce_proc = Proc.new { ex.nonce_arbitrary }
       sig = context.ecdsa_sign(ex.message_hash, ex.seckey, nonce_proc)
       expect(sig).to eq ex.signature
     end
@@ -120,7 +166,7 @@ describe 'Secp256k1::Context with signing enabled' do
     end
 
     it 'gives the right signature (arbitrary nonce)' do
-      nonce_proc = Proc.new { ex.nonce }
+      nonce_proc = Proc.new { ex.nonce_arbitrary }
       sig = context.ecdsa_sign_compact(ex.message_hash, ex.seckey, nonce_proc)
       expect(sig).to eq ex.signature_compact
     end
@@ -187,20 +233,6 @@ describe 'Secp256k1::Context with verifying enabled' do
     it 'returns nil if something is wrong' do
       pubkey = context.ecdsa_recover_compact(ex.message_hash, "\x00" * 64, true, 0)
       expect(pubkey).to eq nil
-    end
-  end
-
-  describe 'secp256k1_ec_seckey_verify' do
-    let(:ex) { ExampleSig1 }
-
-    it 'returns 1 for a valid secret key' do
-      result = context.ec_seckey_verify(ex.seckey)
-      expect(result).to eq 1
-    end
-
-    it 'returns 0 for an invalid secret key' do
-      result = context.ec_seckey_verify("\xFF" * 32)
-      expect(result).to eq 0
     end
   end
 end

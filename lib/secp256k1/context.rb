@@ -1,4 +1,5 @@
 require 'secp256k1/foreign_library'
+require 'secp256k1/argument'
 
 module Secp256k1
   class Context
@@ -107,6 +108,11 @@ module Secp256k1
     def ec_seckey_verify(seckey)
       seckey = Argument::SecretKeyIn.new(seckey)
       @lib.secp256k1_ec_seckey_verify(self, seckey.string)
+    end
+
+    def ec_pubkey_verify(pubkey)
+      pubkey = Argument::PublicKeyIn.new(pubkey)
+      @lib.secp256k1_ec_pubkey_verify(self, pubkey.string, pubkey.length)
     end
 
     # This is not part of the public API of the gem.  It may change in
