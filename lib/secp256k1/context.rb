@@ -79,11 +79,7 @@ module Secp256k1
     def ecdsa_recover_compact(msg32, sig64, compressed, recid)
       msg32 = Argument::MessageHash.new(msg32)
       sig64 = Argument::SignatureCompactIn.new(sig64)
-
-      if ![true, false, nil].include?(compressed)
-        raise 'compressed must be true, false, or nil'
-      end
-      compressed = compressed ? 1 : 0
+      compressed = Argument::Compressed.new(compressed)
 
       raise 'recid must be an integer' if !recid.is_a?(Integer)
 
@@ -91,7 +87,7 @@ module Secp256k1
 
       result = @lib.secp256k1_ecdsa_recover_compact(self,
         msg32.string, sig64.string, pubkey.pointer, pubkey.size_pointer,
-        compressed, recid)
+        compressed.to_i, recid)
 
       case result
       when 0
@@ -113,6 +109,27 @@ module Secp256k1
     def ec_pubkey_verify(pubkey)
       pubkey = Argument::PublicKeyIn.new(pubkey)
       @lib.secp256k1_ec_pubkey_verify(self, pubkey.string, pubkey.length)
+    end
+
+    def ec_pubkey_create(seckey, compressed)
+      seckey = Argument::SecretKeyIn.new(seckey)
+      compressed = Argument::Compressed.new(compressed)
+
+      pubkey = Argument::PublicKeyOut.new
+
+      result = @lib.secp256k1_ec_pubkey_create(self, pubkey.pointer,
+        pubkey.size_pointer, seckey.string, compressed.to_i)
+
+      case result
+      when 0
+        # secret was invalid, try again
+        nil
+      when 1
+        # secret was valid
+        pubkey.value
+      else
+        raise 'unexpected error'
+      end
     end
 
     # This is not part of the public API of the gem.  It may change in

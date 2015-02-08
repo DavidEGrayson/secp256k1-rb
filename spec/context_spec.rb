@@ -177,6 +177,23 @@ describe 'Secp256k1::Context with signing enabled' do
       expect(sig).to eq nil
     end
   end
+
+  describe 'ec_pubkey_create' do
+    it 'can create a public key (compressed)' do
+      pubkey = context.ec_pubkey_create(ExampleSig1.seckey, true)
+      expect(pubkey).to eq ExampleSig1.pubkey_compressed
+    end
+
+    it 'can create a public key (uncompressed)' do
+      pubkey = context.ec_pubkey_create(ExampleSig1.seckey, false)
+      expect(pubkey).to eq ExampleSig1.pubkey_uncompressed
+    end
+
+    it 'returns nil for invalid secret keys' do
+      pubkey = context.ec_pubkey_create("\x00" * 32, false)
+      expect(pubkey).to eq nil
+    end
+  end
 end
 
 describe 'Secp256k1::Context with verifying enabled' do

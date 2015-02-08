@@ -162,5 +162,26 @@ module Secp256k1
         @pointer.read_int
       end
     end
+
+    class Boolean
+      AllowedInputs = [true, false, nil]
+
+      def initialize(value, name)
+        if !AllowedInputs.include?(value)
+          raise ArgumentError, "#{name} must be true, false, or nil"
+        end
+        @integer = value ? 1 : 0
+      end
+
+      def to_i
+        @integer
+      end
+    end
+
+    class Compressed < Boolean
+      def initialize(compressed)
+        super compressed, :compressed
+      end
+    end
   end
 end

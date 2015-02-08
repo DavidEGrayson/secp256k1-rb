@@ -172,3 +172,22 @@ describe Secp256k1::Argument::VarStringOut do
     expect(arg.value).to eq str
   end
 end
+
+describe Secp256k1::Argument::Boolean do
+  it 'converts true to 1' do
+    expect(described_class.new(true, :foo).to_i).to eq 1
+  end
+
+  it 'converts false to 0' do
+    expect(described_class.new(true, :foo).to_i).to eq 1
+  end
+
+  it 'converts nil to 0' do
+    expect(described_class.new(true, :foo).to_i).to eq 1
+  end
+
+  it 'raises an exception for anything else' do
+    expect {described_class.new(1, :foo) }.to raise_error \
+      ArgumentError, 'foo must be true, false, or nil'
+  end
+end
