@@ -10,6 +10,9 @@ module Secp256k1
     MAX_SIGNATURE_LENGTH = 72
     COMPACT_SIGNATURE_LENGTH = 64
 
+    VALID_PUBKEY_LENGTHS = [33, 65]
+    MAX_PUBKEY_LENGTH = VALID_PUBKEY_LENGTHS.max
+
     ffi_lib 'secp256k1'
 
     lib = ffi_libraries.first

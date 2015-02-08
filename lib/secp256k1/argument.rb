@@ -68,6 +68,41 @@ module Secp256k1
       end
     end
 
+    class VarStringInOut
+      attr_reader :pointer
+      attr_reader :size_pointer
+
+      def initialize(in_value, name, max_length)
+        if !in_value.is_a?(String)
+          raise ArgumentError, "#{name} input value must be a string"
+        end
+
+        if in_value.bytesize > max_length
+          raise ArgumentError, "#{name} input value is too long"
+        end
+
+        @pointer = FFI::MemoryPointer.new(:uchar, max_length)
+        @pointer.put_bytes(0, in_value)
+
+        @size_pointer = FFI::MemoryPointer.new(:int)
+        @size_pointer.write_int(in_value.length)
+      end
+
+      def value
+        @pointer.read_string(@size_pointer.read_int)
+      end
+    end
+
+    class PublicKeyInOutVar < VarStringInOut
+      def initialize(pubkey)
+        super pubkey, :pubkey, ForeignLibrary::MAX_PUBKEY_LENGTH
+
+        if !ForeignLibrary::VALID_PUBKEY_LENGTHS.include?(pubkey.length)
+          raise ArgumentError, 'pubkey has invalid length'
+        end
+      end
+    end
+
     class SignatureOut < VarStringOut
       def initialize
         super ForeignLibrary::MAX_SIGNATURE_LENGTH
@@ -76,7 +111,7 @@ module Secp256k1
 
     class PublicKeyOut < VarStringOut
       def initialize
-        super 65
+        super ForeignLibrary::MAX_PUBKEY_LENGTH
       end
     end
 

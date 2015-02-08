@@ -101,6 +101,29 @@ describe 'Secp256k1::Context with nothing enabled' do
       expect(result).to eq 0
     end
   end
+
+  describe 'ec_pubkey_decompress' do
+    it 'can decompress a public key' do
+      pubkey = context.ec_pubkey_decompress(ExampleSig1.pubkey_compressed)
+      expect(pubkey).to eq ExampleSig1.pubkey_uncompressed
+    end
+
+    # TODO: shouldn't this really just raise ArgumentError?  Isn't it
+    # inconsistent that if an argument is the wrong length it usually gets an
+    # ArgumentError but if the C library tells us an argument is invalid, we
+    # just return some error code?  Should we look at all the return codes in
+    # the library and think about which ones are ArgumentErrors and which should
+    # keep on being return codes?
+    it 'returns nil if the compressed key was wrong' do
+      pubkey = context.ec_pubkey_decompress("\xFF" * 33)
+      expect(pubkey).to eq nil
+    end
+
+    it 'raises an ArgumentError if the compressed key was a bad length' do
+      expect { context.ec_pubkey_decompress('hi') }.to raise_error \
+        ArgumentError, 'pubkey has invalid length'
+    end
+  end
 end
 
 describe 'Secp256k1::Context with signing enabled' do

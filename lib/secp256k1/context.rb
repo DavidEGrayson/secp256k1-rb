@@ -132,6 +132,23 @@ module Secp256k1
       end
     end
 
+    def ec_pubkey_decompress(pubkey)
+      pubkey = Argument::PublicKeyInOutVar.new(pubkey)
+
+      result = @lib.secp256k1_ec_pubkey_decompress(self, pubkey.pointer, pubkey.size_pointer)
+
+      case result
+      when 0
+        # public key was invalid
+        nil
+      when 1
+        # success
+        pubkey.value
+      else
+        raise 'unexpected result'
+      end
+    end
+
     # This is not part of the public API of the gem.  It may change in
     # the future without notice.  This method makes it so we can pass
     # a Context object to FFI and it automatically converts it to a

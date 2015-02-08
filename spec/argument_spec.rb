@@ -191,3 +191,51 @@ describe Secp256k1::Argument::Boolean do
       ArgumentError, 'foo must be true, false, or nil'
   end
 end
+
+describe Secp256k1::Argument::VarStringInOut do
+  let (:max_length) { 7 }
+
+  it 'raises an ArgumentError if the input is not a string' do
+    expect { described_class.new(1234, :foo, 7) }.to raise_error \
+      ArgumentError, 'foo input value must be a string'
+  end
+
+  it 'raises an ArgumentError if the input is too long' do
+    expect { described_class.new('abcdefgh', :foo, 7) }.to raise_error \
+      ArgumentError, 'foo input value is too long'
+  end
+
+  describe 'buffer' do
+    subject(:pointer) { described_class.new('hi', :foo, 7).pointer }
+
+    it 'is large enough to hold a max_length string' do
+      expect(pointer.size).to eq max_length
+    end
+
+    it 'initially holds in_value' do
+      expect(pointer.read_string(2)).to eq 'hi'
+    end
+  end
+
+  describe 'size_pointer' do
+    subject(:size_pointer) { described_class.new('hi', :foo, 7).size_pointer }
+
+    it 'points to an int' do
+      expect(size_pointer.size).to eq FFI.type_size(FFI::Type::INT)
+    end
+
+    it 'initially has in_value.length' do
+      expect(size_pointer.read_int).to eq 2
+    end
+  end
+
+  describe 'value' do
+    it 'gets the string value specified by the two pointers' do
+      arg = described_class.new('hi', :foo, max_length)
+      expect(arg.value).to eq 'hi'
+      arg.pointer.put_bytes(0, 'bye')
+      arg.size_pointer.write_int(3)
+      expect(arg.value).to eq 'bye'
+    end
+  end
+end
