@@ -68,6 +68,24 @@ module Secp256k1
       end
     end
 
+    class SignatureOut < VarStringOut
+      def initialize
+        super ForeignLibrary::MAX_SIGNATURE_LENGTH
+      end
+    end
+
+    class PublicKeyOut < VarStringOut
+      def initialize
+        super ForeignLibrary::MAX_PUBKEY_LENGTH
+      end
+    end
+
+    class PrivateKeyDerOut < VarStringOut
+      def initialize
+        super ForeignLibrary::MAX_PRIVKEY_DER_LENGTH
+      end
+    end
+
     class VarStringInOut
       attr_reader :pointer
       attr_reader :size_pointer
@@ -100,18 +118,6 @@ module Secp256k1
         if !ForeignLibrary::VALID_PUBKEY_LENGTHS.include?(pubkey.length)
           raise ArgumentError, 'pubkey has invalid length'
         end
-      end
-    end
-
-    class SignatureOut < VarStringOut
-      def initialize
-        super ForeignLibrary::MAX_SIGNATURE_LENGTH
-      end
-    end
-
-    class PublicKeyOut < VarStringOut
-      def initialize
-        super ForeignLibrary::MAX_PUBKEY_LENGTH
       end
     end
 

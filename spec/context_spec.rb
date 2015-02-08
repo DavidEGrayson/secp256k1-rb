@@ -217,6 +217,20 @@ describe 'Secp256k1::Context with signing enabled' do
       expect(pubkey).to eq nil
     end
   end
+
+  describe 'ec_privkey_export' do
+    let(:ex) { ExampleSig1 }
+
+    it 'can export a private key to DER format (compressed)' do
+      der = context.ec_privkey_export(ex.seckey, true)
+      expect(der).to eq ex.privkey_der_compressed
+    end
+
+    it 'can export a private key to DER format (uncompressed)' do
+      der = context.ec_privkey_export(ex.seckey, false)
+      expect(der).to eq ex.privkey_der_uncompressed
+    end
+  end
 end
 
 describe 'Secp256k1::Context with verifying enabled' do
