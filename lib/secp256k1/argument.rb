@@ -31,7 +31,7 @@ module Secp256k1
 
     class SecretKeyIn < StringIn
       def initialize(seckey)
-        super seckey, :seckey, length: 32
+        super seckey, :seckey, length: ForeignLibrary::SECRET_KEY_LENGTH
       end
     end
 
@@ -50,6 +50,12 @@ module Secp256k1
     class SignatureCompactIn < StringIn
       def initialize(sig64)
         super sig64, :sig64, length: 64
+      end
+    end
+
+    class PrivateKeyDerIn < StringIn
+      def initialize(privkey)
+        super privkey, :privkey
       end
     end
 
@@ -138,6 +144,12 @@ module Secp256k1
     class SignatureCompactOut < FixedStringOut
       def initialize
         super ForeignLibrary::COMPACT_SIGNATURE_LENGTH
+      end
+    end
+
+    class SecretKeyOut < FixedStringOut
+      def initialize
+        super ForeignLibrary::SECRET_KEY_LENGTH
       end
     end
 

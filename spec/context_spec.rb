@@ -124,6 +124,22 @@ describe 'Secp256k1::Context with nothing enabled' do
         ArgumentError, 'pubkey has invalid length'
     end
   end
+
+  describe 'ec_privkey_import' do
+    it 'can import a DER pviate key (compressed)' do
+      seckey = context.ec_privkey_import(ExampleSig1.privkey_der_uncompressed)
+      expect(seckey).to eq ExampleSig1.seckey
+    end
+
+    it 'can import a DER pviate key (uncompressed)' do
+      seckey = context.ec_privkey_import(ExampleSig1.privkey_der_compressed)
+      expect(seckey).to eq ExampleSig1.seckey
+    end
+
+    it 'returns nil if the DER was invalid' do
+      expect(context.ec_privkey_import('junk')).to eq nil
+    end
+  end
 end
 
 describe 'Secp256k1::Context with signing enabled' do

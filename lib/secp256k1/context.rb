@@ -168,6 +168,24 @@ module Secp256k1
       end
     end
 
+    def ec_privkey_import(privkey)
+      privkey = Argument::PrivateKeyDerIn.new(privkey)
+      seckey = Argument::SecretKeyOut.new
+
+      result = @lib.secp256k1_ec_privkey_import(self, seckey.pointer,
+        privkey.string, privkey.length)
+
+      # TODO: get libsecp256k1 to document this return vale
+      case result
+      when 0
+        nil
+      when 1
+        seckey.value
+      else
+        raise 'unexpected result'
+      end
+    end
+
     # This is not part of the public API of the gem.  It may change in
     # the future without notice.  This method makes it so we can pass
     # a Context object to FFI and it automatically converts it to a
