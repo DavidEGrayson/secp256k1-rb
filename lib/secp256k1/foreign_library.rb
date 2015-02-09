@@ -14,6 +14,7 @@ module Secp256k1
     MAX_PUBKEY_LENGTH = VALID_PUBKEY_LENGTHS.max
 
     SECRET_KEY_LENGTH = 32
+    HASH_LENGTH = 32
     MAX_PRIVKEY_DER_LENGTH = 300  # just a guess; not documented in secp256k1.h
 
     ffi_lib 'secp256k1'

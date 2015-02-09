@@ -11,7 +11,7 @@ module Secp256k1
         end
 
         if opts[:length] && string.bytesize != opts[:length]
-          raise ArgumentError, "#{name} must be 32 bytes long"
+          raise ArgumentError, "#{name} must be #{opts[:length]} bytes long"
         end
 
         @string = string
@@ -25,7 +25,7 @@ module Secp256k1
 
     class MessageHash < StringIn
       def initialize(msg32)
-        super msg32, :msg32, length: 32
+        super msg32, :msg32, length: ForeignLibrary::HASH_LENGTH
       end
     end
 
@@ -98,11 +98,11 @@ module Secp256k1
 
       def initialize(in_value, name, max_length)
         if !in_value.is_a?(String)
-          raise ArgumentError, "#{name} input value must be a string"
+          raise ArgumentError, "#{name} must be a string"
         end
 
         if in_value.bytesize > max_length
-          raise ArgumentError, "#{name} input value is too long"
+          raise ArgumentError, "#{name} is too long"
         end
 
         @pointer = FFI::MemoryPointer.new(:uchar, max_length)
@@ -153,6 +153,28 @@ module Secp256k1
       end
     end
 
+    class FixedStringInOut < FixedStringOut
+      def initialize(string, name, length)
+        super(length)
+
+        if !string.is_a?(String)
+          raise ArgumentError, "#{name} must be a string"
+        end
+
+        if string.bytesize != length
+          raise ArgumentError, "#{name} must be #{length} bytes long"
+        end
+
+        pointer.put_bytes(0, string)
+      end
+    end
+
+    class SecretKeyInOut < FixedStringInOut
+      def initialize(value)
+        super value, :seckey, ForeignLibrary::SECRET_KEY_LENGTH
+      end
+    end
+
     class NonceFunction
       attr_reader :func
 
@@ -196,11 +218,11 @@ module Secp256k1
       attr_reader :pointer
 
       def initialize
-        @pointer = FFI::MemoryPointer.new(:uchar, 32)
+        @pointer = FFI::MemoryPointer.new(:uchar, ForeignLibrary::SECRET_KEY_LENGTH)
       end
 
       def value
-        @pointer.read_string(32)
+        @pointer.read_string(ForeignLibrary::SECRET_KEY_LENGTH)
       end
     end
 

@@ -140,6 +140,21 @@ describe 'Secp256k1::Context with nothing enabled' do
       expect(context.ec_privkey_import('junk')).to eq nil
     end
   end
+
+  describe 'ec_privkey_tweak_add' do
+    let(:ex) { Example2 }
+
+    it 'adds correctly' do
+      sum = context.ec_privkey_tweak_add(ex.privkey1, ex.privkey2)
+      expect(sum).to eq ex.privkey_sum
+    end
+
+    it 'returns nil if the second argument is too big' do
+      # TODO: prolly should be ArgumentError
+      sum = context.ec_privkey_tweak_add(ex.privkey1, "\xFF" * 32)
+      expect(sum).to eq nil
+    end
+  end
 end
 
 describe 'Secp256k1::Context with signing enabled' do

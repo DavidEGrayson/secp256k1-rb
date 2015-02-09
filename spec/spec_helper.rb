@@ -174,4 +174,8 @@ ExampleSig1 = OpenStruct.new.tap do |e|
   e.signature_compact_nonce_default = e.signature_compact_rfc6979
 end
 
-
+Example2 = OpenStruct.new.tap do |e|
+  e.privkey1 = "\x44" * 32
+  e.privkey2 = "\x11" * 32
+  e.privkey_sum = "\x55" * 32
+end

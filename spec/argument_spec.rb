@@ -18,7 +18,7 @@ describe Secp256k1::Argument::StringIn do
 
     it 'raises an ArgumentError if arg is not 32 bytes' do
       expect { described_class.new("\x00" * 31, :foo, opts) }
-        .to raise_error ArgumentError, 'foo must be 32 bytes long'
+        .to raise_error ArgumentError, 'foo must be 44 bytes long'
     end
   end
 end
@@ -125,9 +125,39 @@ describe Secp256k1::Argument::FixedStringOut do
   let(:length) { 14 }
   subject(:arg) { described_class.new(length) }
 
-  it 'makes a buffer wit the right length' do
+  it 'makes a buffer with the right length' do
     expect(arg.pointer).to be_a FFI::MemoryPointer
     expect(arg.pointer.size).to eq length
+  end
+
+  it 'converts the buffer to a string for ruby' do
+    str = 'a' * length
+    arg.pointer.put_bytes(0, str)
+    expect(arg.value).to eq str
+  end
+end
+
+describe Secp256k1::Argument::FixedStringInOut do
+  let(:length) { 5 }
+  subject(:arg) { described_class.new('david', :name, length) }
+
+  it 'raises an ArgumentError if the input is not a string' do
+    expect { described_class.new(1234, :foo, 7) }.to raise_error \
+      ArgumentError, 'foo must be a string'
+  end
+
+  it 'raises an ArgumentError if the input is the wrong length' do
+    expect { described_class.new('abcdefgh', :foo, 7) }.to raise_error \
+      ArgumentError, 'foo must be 7 bytes long'
+  end
+
+  it 'makes a buffer with the right length' do
+    expect(arg.pointer).to be_a FFI::MemoryPointer
+    expect(arg.pointer.size).to eq length
+  end
+
+  it 'sets the buffer to the right contents' do
+    expect(arg.pointer.read_bytes(length)).to eq 'david'
   end
 
   it 'converts the buffer to a string for ruby' do
@@ -197,12 +227,12 @@ describe Secp256k1::Argument::VarStringInOut do
 
   it 'raises an ArgumentError if the input is not a string' do
     expect { described_class.new(1234, :foo, 7) }.to raise_error \
-      ArgumentError, 'foo input value must be a string'
+      ArgumentError, 'foo must be a string'
   end
 
   it 'raises an ArgumentError if the input is too long' do
     expect { described_class.new('abcdefgh', :foo, 7) }.to raise_error \
-      ArgumentError, 'foo input value is too long'
+      ArgumentError, 'foo is too long'
   end
 
   describe 'buffer' do

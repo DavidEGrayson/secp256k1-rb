@@ -186,6 +186,22 @@ module Secp256k1
       end
     end
 
+    def ec_privkey_tweak_add(seckey, tweak)
+      seckey = Argument::SecretKeyInOut.new(seckey)
+      tweak = Argument::SecretKeyIn.new(tweak)
+
+      result = @lib.secp256k1_ec_privkey_tweak_add(self, seckey.pointer, tweak.string)
+
+      case result
+      when 0
+        nil
+      when 1
+        seckey.value
+      else
+        raise 'unexpected result'
+      end
+    end
+
     # This is not part of the public API of the gem.  It may change in
     # the future without notice.  This method makes it so we can pass
     # a Context object to FFI and it automatically converts it to a
