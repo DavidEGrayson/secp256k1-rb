@@ -234,6 +234,22 @@ module Secp256k1
       end
     end
 
+    def ec_pubkey_tweak_mul(pubkey, tweak)
+      pubkey = Argument::PublicKeyInOutVar.new(pubkey)
+      tweak = Argument::SecretKeyIn.new(tweak)
+
+      result = @lib.secp256k1_ec_pubkey_tweak_mul(self, pubkey.pointer, pubkey.length, tweak.string)
+
+      case result
+      when 0
+        nil
+      when 1
+        pubkey.value
+      else
+        raise 'unexpected result'
+      end
+    end
+
     # This is not part of the public API of the gem.  It may change in
     # the future without notice.  This method makes it so we can pass
     # a Context object to FFI and it automatically converts it to a

@@ -354,4 +354,27 @@ describe 'Secp256k1::Context with verifying enabled' do
     end
   end
 
+  describe 'ec_pubkey_tweak_mul' do
+    let(:ex) { Example2 }
+
+    it 'multiplies correctly (compressed)' do
+      product = context.ec_pubkey_tweak_mul(ex.pubkey1, ex.privkey2)
+      expect(product).to eq ex.pubkey_product
+    end
+
+    it 'multiplies correctly (uncompressed)' do
+      product = context.ec_pubkey_tweak_mul(ex.pubkey1_uncompressed, ex.privkey2)
+      expect(product).to eq ex.pubkey_product_uncompressed
+    end
+
+    it 'returns nil if the pubkey is invalid' do
+      product = context.ec_pubkey_tweak_mul("\xFF" * 33, ex.privkey2)
+      expect(product).to eq nil
+    end
+
+    it 'returns nil if the tweak is invalid' do
+      product = context.ec_pubkey_tweak_mul(ex.pubkey1, "\xFF" * 32)
+      expect(product).to eq nil
+    end
+  end
 end
