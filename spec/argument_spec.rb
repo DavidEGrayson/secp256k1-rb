@@ -259,6 +259,14 @@ describe Secp256k1::Argument::VarStringInOut do
     end
   end
 
+  describe 'length' do
+    subject(:length) { described_class.new('hi', :foo, 7).length }
+
+    it 'initially has in_value.length' do
+      expect(length).to eq 2
+    end
+  end
+
   describe 'value' do
     it 'gets the string value specified by the two pointers' do
       arg = described_class.new('hi', :foo, max_length)

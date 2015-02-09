@@ -329,4 +329,29 @@ describe 'Secp256k1::Context with verifying enabled' do
       expect(pubkey).to eq nil
     end
   end
+
+  describe 'ec_pubkey_tweak_add' do
+    let(:ex) { Example2 }
+
+    it 'adds correctly (compressed)' do
+      sum = context.ec_pubkey_tweak_add(ex.pubkey1, ex.privkey2)
+      expect(sum).to eq ex.pubkey_sum
+    end
+
+    it 'adds correctly (uncompressed)' do
+      sum = context.ec_pubkey_tweak_add(ex.pubkey1_uncompressed, ex.privkey2)
+      expect(sum).to eq ex.pubkey_sum_uncompressed
+    end
+
+    it 'returns nil if the pubkey is invalid' do
+      sum = context.ec_pubkey_tweak_add("\xFF" * 33, ex.privkey2)
+      expect(sum).to eq nil
+    end
+
+    it 'returns nil if the tweak is invalid' do
+      sum = context.ec_pubkey_tweak_add(ex.pubkey1, "\xFF" * 32)
+      expect(sum).to eq nil
+    end
+  end
+
 end

@@ -113,7 +113,11 @@ module Secp256k1
       end
 
       def value
-        @pointer.read_string(@size_pointer.read_int)
+        @pointer.read_string(length)
+      end
+
+      def length
+        @size_pointer.read_int
       end
     end
 

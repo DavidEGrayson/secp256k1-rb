@@ -202,6 +202,22 @@ module Secp256k1
       end
     end
 
+    def ec_pubkey_tweak_add(pubkey, tweak)
+      pubkey = Argument::PublicKeyInOutVar.new(pubkey)
+      tweak = Argument::SecretKeyIn.new(tweak)
+
+      result = @lib.secp256k1_ec_pubkey_tweak_add(self, pubkey.pointer, pubkey.length, tweak.string)
+
+      case result
+      when 0
+        nil
+      when 1
+        pubkey.value
+      else
+        raise 'unexpected result'
+      end
+    end
+
     def ec_privkey_tweak_mul(seckey, tweak)
       seckey = Argument::SecretKeyInOut.new(seckey)
       tweak = Argument::SecretKeyIn.new(tweak)
