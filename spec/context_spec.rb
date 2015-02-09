@@ -155,6 +155,15 @@ describe 'Secp256k1::Context with nothing enabled' do
       expect(sum).to eq nil
     end
   end
+
+  describe 'ec_privkey_tweak_mul' do
+    let(:ex) { Example2 }
+
+    it 'multiplies correctly' do
+      product = context.ec_privkey_tweak_mul(ex.privkey1, ex.privkey2)
+      expect(product).to eq ex.privkey_product
+    end
+  end
 end
 
 describe 'Secp256k1::Context with signing enabled' do

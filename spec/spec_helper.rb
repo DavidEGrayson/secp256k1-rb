@@ -176,6 +176,14 @@ end
 
 Example2 = OpenStruct.new.tap do |e|
   e.privkey1 = "\x44" * 32
+
   e.privkey2 = "\x11" * 32
+
   e.privkey_sum = "\x55" * 32
+
+  e.privkey_product =
+    "\xd6\x6c\xc8\xc2\xf1\x3d\x8e\xb7" \
+    "\x49\x80\xfe\xae\xb9\xf3\xb7\x50" \
+    "\xf0\x65\x13\x10\xe4\xc2\x8c\x4c" \
+    "\x6a\x65\x66\xe4\xb9\xec\x13\x06"
 end
