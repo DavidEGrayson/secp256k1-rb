@@ -8,13 +8,13 @@ module Secp256k1
     class StringIn
       attr_reader :string
 
-      def initialize(string, name, opts={})
+      def initialize(string, name, opts = {})
         if !string.is_a?(String)
-          raise ArgumentError, "#{name} must be a string"
+          fail ArgumentError, "#{name} must be a string"
         end
 
         if opts[:length] && string.bytesize != opts[:length]
-          raise ArgumentError, "#{name} must be #{opts[:length]} bytes long"
+          fail ArgumentError, "#{name} must be #{opts[:length]} bytes long"
         end
 
         @string = string
@@ -101,11 +101,11 @@ module Secp256k1
 
       def initialize(in_value, name, max_length)
         if !in_value.is_a?(String)
-          raise ArgumentError, "#{name} must be a string"
+          fail ArgumentError, "#{name} must be a string"
         end
 
         if in_value.bytesize > max_length
-          raise ArgumentError, "#{name} is too long"
+          fail ArgumentError, "#{name} is too long"
         end
 
         @pointer = FFI::MemoryPointer.new(:uchar, max_length)
@@ -129,7 +129,7 @@ module Secp256k1
         super pubkey, :pubkey, ForeignLibrary::MAX_PUBKEY_LENGTH
 
         if !ForeignLibrary::VALID_PUBKEY_LENGTHS.include?(pubkey.length)
-          raise ArgumentError, 'pubkey has invalid length'
+          fail ArgumentError, 'pubkey has invalid length'
         end
       end
     end
@@ -165,11 +165,11 @@ module Secp256k1
         super(length)
 
         if !string.is_a?(String)
-          raise ArgumentError, "#{name} must be a string"
+          fail ArgumentError, "#{name} must be a string"
         end
 
         if string.bytesize != length
-          raise ArgumentError, "#{name} must be #{length} bytes long"
+          fail ArgumentError, "#{name} must be #{length} bytes long"
         end
 
         pointer.put_bytes(0, string)
@@ -196,14 +196,14 @@ module Secp256k1
                 when nil
                   nil
                 else
-                  raise ArgumentError, "invalid noncefp"
+                  fail ArgumentError, 'invalid noncefp'
                 end
       end
 
       private
 
       def wrapper_proc(noncefp)
-        Proc.new do |nonce32, msg32, seckey, attempt, data|
+        proc do |nonce32, msg32, seckey, attempt, _data|
           msg32 = msg32.read_string(32)
           seckey = seckey.read_string(32)
 
@@ -213,12 +213,12 @@ module Secp256k1
             0
           when String
             if nonce.bytesize != 32
-              raise 'nonce must be 32 bytes long'
+              fail 'nonce must be 32 bytes long'
             end
             nonce32.write_string(nonce)
             1
           else
-            raise 'nonce must be a string'
+            fail 'nonce must be a string'
           end
         end
       end
@@ -253,7 +253,7 @@ module Secp256k1
 
       def initialize(value, name)
         if !AllowedInputs.include?(value)
-          raise ArgumentError, "#{name} must be true, false, or nil"
+          fail ArgumentError, "#{name} must be true, false, or nil"
         end
         @integer = value ? 1 : 0
       end

@@ -27,7 +27,7 @@ module Secp256k1
     case result
     when 1 then nonce.value
     when 0 then nil
-    else raise 'unexpected result'
+    else fail 'unexpected result'
     end
   end
 end

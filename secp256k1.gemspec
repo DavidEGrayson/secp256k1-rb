@@ -5,7 +5,7 @@ Gem::Specification.new do |spec|
   spec.version       = Secp256k1::VERSION
   spec.authors       = ['Andy Alness', 'Micah Winkelspecht']
   spec.email         = ['hello@gem.co']
-  spec.summary       = %q{Wrapper for libsecp256k1.}
+  spec.summary       = 'Wrapper for libsecp256k1.'
   spec.homepage      = ''
   spec.license       = 'MIT'
 

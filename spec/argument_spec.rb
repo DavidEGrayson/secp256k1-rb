@@ -41,7 +41,7 @@ describe Secp256k1::Argument::NonceFunction do
     before do
       @wrapped_proc_return = nil
       @nonce_buffer = FFI::MemoryPointer.new(:uchar, 32)
-      @proc = Proc.new do |msg32, seckey, n|
+      @proc = proc do |msg32, seckey, n|
         @arg_msg32_to_proc = msg32
         @arg_seckey_to_proc = seckey
         @arg_n_to_proc = n
@@ -227,7 +227,7 @@ describe Secp256k1::Argument::Boolean do
   end
 
   it 'raises an exception for anything else' do
-    expect {described_class.new(1, :foo) }.to raise_error \
+    expect { described_class.new(1, :foo) }.to raise_error \
       ArgumentError, 'foo must be true, false, or nil'
   end
 end

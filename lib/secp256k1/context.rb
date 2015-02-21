@@ -49,7 +49,7 @@ module Secp256k1
         # signature created
         sig.value
       else
-        raise 'unexpected result'
+        fail 'unexpected result'
       end
     end
 
@@ -72,7 +72,7 @@ module Secp256k1
         # signature created
         [sig.value, recid.value]
       else
-        raise 'unexpected result'
+        fail 'unexpected result'
       end
     end
 
@@ -97,7 +97,7 @@ module Secp256k1
         # public key successfully recovered (which guarantees a correct signature)
         pubkey.value
       else
-        raise 'unexpected result'
+        fail 'unexpected result'
       end
     end
 
@@ -128,7 +128,7 @@ module Secp256k1
         # secret was valid
         pubkey.value
       else
-        raise 'unexpected error'
+        fail 'unexpected error'
       end
     end
 
@@ -145,7 +145,7 @@ module Secp256k1
         # success
         pubkey.value
       else
-        raise 'unexpected result'
+        fail 'unexpected result'
       end
     end
 
@@ -163,7 +163,7 @@ module Secp256k1
       when 1
         privkey.value
       else
-        raise 'unexpected result'
+        fail 'unexpected result'
       end
     end
 
@@ -180,7 +180,7 @@ module Secp256k1
       when 1
         seckey.value
       else
-        raise 'unexpected result'
+        fail 'unexpected result'
       end
     end
 
@@ -196,7 +196,7 @@ module Secp256k1
       when 1
         seckey.value
       else
-        raise 'unexpected result'
+        fail 'unexpected result'
       end
     end
 
@@ -212,7 +212,7 @@ module Secp256k1
       when 1
         pubkey.value
       else
-        raise 'unexpected result'
+        fail 'unexpected result'
       end
     end
 
@@ -228,7 +228,7 @@ module Secp256k1
       when 1
         seckey.value
       else
-        raise 'unexpected result'
+        fail 'unexpected result'
       end
     end
 
@@ -244,7 +244,7 @@ module Secp256k1
       when 1
         pubkey.value
       else
-        raise 'unexpected result'
+        fail 'unexpected result'
       end
     end
 

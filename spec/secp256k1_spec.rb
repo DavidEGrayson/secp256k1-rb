@@ -13,7 +13,6 @@ describe Secp256k1 do
       nonce = Secp256k1.send(method, ex.message_hash, ex.seckey, 1)
       expect(nonce).to eq ex.nonce_rfc6979_1
     end
-
   end
 
   describe 'nonce_function_default' do

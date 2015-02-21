@@ -6,7 +6,7 @@ describe 'Secp256k1::Context unit tests' do
 
   let(:lib) do
     d = double('lib')
-    allow(d).to receive(:secp256k1_context_destroy) { |ptr| }
+    allow(d).to receive(:secp256k1_context_destroy) { |_ptr| }
     allow(d).to receive(:secp256k1_context_create) { FFI::Pointer.new(0) }
     d
   end
@@ -185,19 +185,19 @@ describe 'Secp256k1::Context with signing enabled' do
     end
 
     it 'gives the right signature (arbitrary nonce)' do
-      nonce_proc = Proc.new { ex.nonce_arbitrary }
+      nonce_proc = proc { ex.nonce_arbitrary }
       sig = context.ecdsa_sign(ex.message_hash, ex.seckey, nonce_proc)
       expect(sig).to eq ex.signature
     end
 
     it 'returns nil if the nonce proc returns nil' do
-      nonce_proc = Proc.new { }
+      nonce_proc = proc {}
       sig = context.ecdsa_sign(ex.message_hash, ex.seckey, nonce_proc)
       expect(sig).to eq nil
     end
 
     it 'allows the nonce proc to raise exceptions' do
-      nonce_proc = Proc.new { raise 'hi' }
+      nonce_proc = proc { fail 'hi' }
       expect { context.ecdsa_sign(ex.message_hash, ex.seckey, nonce_proc) }
         .to raise_error 'hi'
     end
@@ -222,13 +222,13 @@ describe 'Secp256k1::Context with signing enabled' do
     end
 
     it 'gives the right signature (arbitrary nonce)' do
-      nonce_proc = Proc.new { ex.nonce_arbitrary }
+      nonce_proc = proc { ex.nonce_arbitrary }
       sig = context.ecdsa_sign_compact(ex.message_hash, ex.seckey, nonce_proc)
       expect(sig).to eq ex.signature_compact
     end
 
     it 'returns nil if the nonce proc returns nil' do
-      nonce_proc = Proc.new { }
+      nonce_proc = proc {}
       sig = context.ecdsa_sign_compact(ex.message_hash, ex.seckey, nonce_proc)
       expect(sig).to eq nil
     end
@@ -265,7 +265,7 @@ describe 'Secp256k1::Context with signing enabled' do
     end
 
     it 'returns nil if the secret key is zero' do
-      der = context.ec_privkey_export("\x00"*32, false)
+      der = context.ec_privkey_export("\x00" * 32, false)
       expect(der).to eq nil
     end
   end
