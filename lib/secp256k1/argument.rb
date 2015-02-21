@@ -212,9 +212,7 @@ module Secp256k1
           when nil
             0
           when String
-            if nonce.bytesize != 32
-              fail 'nonce must be 32 bytes long'
-            end
+            fail 'nonce must be 32 bytes long' if nonce.bytesize != 32
             nonce32.write_string(nonce)
             1
           else
@@ -249,10 +247,10 @@ module Secp256k1
     end
 
     class Boolean
-      AllowedInputs = [true, false, nil]
+      ALLOWED_INPUTS = [true, false, nil]
 
       def initialize(value, name)
-        if !AllowedInputs.include?(value)
+        if !ALLOWED_INPUTS.include?(value)
           fail ArgumentError, "#{name} must be true, false, or nil"
         end
         @integer = value ? 1 : 0

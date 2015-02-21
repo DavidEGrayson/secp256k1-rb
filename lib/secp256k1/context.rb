@@ -81,7 +81,7 @@ module Secp256k1
       sig64 = Argument::SignatureCompactIn.new(sig64)
       compressed = Argument::Compressed.new(compressed)
 
-      raise 'recid must be an integer' if !recid.is_a?(Integer)
+      fail 'recid must be an integer' unless recid.is_a?(Integer)
 
       pubkey = Argument::PublicKeyOut.new
 

@@ -3,6 +3,7 @@ require 'secp256k1/foreign_library'
 require 'secp256k1/context'
 require 'secp256k1/argument'
 
+# This the main module of the gem.  Everything lives inside this module.
 module Secp256k1
   def self.nonce_function_default(msg32, seckey, attempt = 0)
     call_nonce_function(ForeignLibrary.secp256k1_nonce_function_default,

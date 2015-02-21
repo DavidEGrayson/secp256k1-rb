@@ -298,12 +298,12 @@ describe 'Secp256k1::Context with verifying enabled' do
 
     it 'returns -1 for invalid public keys' do
       result = context.ecdsa_verify(ex.message_hash, ex.signature, 'junk')
-      expect(result).to eq -1
+      expect(result).to eq(-1)
     end
 
     it 'returns -2 for invalid signatures' do
       result = context.ecdsa_verify(ex.message_hash, 'junk', ex.pubkey)
-      expect(result).to eq -2
+      expect(result).to eq(-2)
     end
   end
 

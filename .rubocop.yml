@@ -1,0 +1,35 @@
+AllCops:
+  DisplayCopNames: true
+
+FormatString:
+  EnforcedStyle: percent
+
+Documentation:
+  Enabled: false
+
+LineLength:
+  Max: 100
+
+NegatedIf:
+  Enabled: false
+
+MethodLength:
+  Max: 20
+
+IfUnlessModifier:
+  Enabled: false
+
+GuardClause:
+  Enabled: false
+
+TrivialAccessors:
+  Enabled: false
+
+AlignParameters:
+  EnforcedStyle: with_fixed_indentation
+
+AbcSize:
+  Max: 20
+
+ClassLength:
+  Max: 300

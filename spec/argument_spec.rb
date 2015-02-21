@@ -25,13 +25,13 @@ end
 
 describe Secp256k1::Argument::NonceFunction do
   describe 'wrapper proc' do
-    let(:msg32) { msg32 = "\xAA".force_encoding('ASCII-8BIT') * 32 }
+    let(:msg32) { "\xAA".force_encoding('ASCII-8BIT') * 32 }
     let(:msg32_ptr) do
       msg32_ptr = FFI::MemoryPointer.new(:uchar, 32)
       msg32_ptr.write_string msg32
     end
 
-    let(:seckey) { seckey = "\xBB".force_encoding('ASCII-8BIT') * 32 }
+    let(:seckey) { "\xBB".force_encoding('ASCII-8BIT') * 32 }
 
     let(:seckey_ptr) do
       seckey_ptr = FFI::MemoryPointer.new(:uchar, 32)
@@ -76,7 +76,7 @@ describe Secp256k1::Argument::NonceFunction do
       end
 
       it 'puts the nonce data into the buffer pointed to by the first argument' do
-        result = @wrapper_proc.call(@nonce_buffer, msg32_ptr, seckey_ptr, 4, nil)
+        @wrapper_proc.call(@nonce_buffer, msg32_ptr, seckey_ptr, 4, nil)
         expect(@nonce_buffer.read_string(32)).to eq @wrapped_proc_return
       end
     end
@@ -233,7 +233,7 @@ describe Secp256k1::Argument::Boolean do
 end
 
 describe Secp256k1::Argument::VarStringInOut do
-  let (:max_length) { 7 }
+  let(:max_length) { 7 }
 
   it 'raises an ArgumentError if the input is not a string' do
     expect { described_class.new(1234, :foo, 7) }.to raise_error \
