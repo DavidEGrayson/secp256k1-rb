@@ -24,8 +24,10 @@ module Secp256k1
 
     result = function.call(nonce.pointer, msg32.string, seckey.string, attempt, nil)
 
-    # TODO: check result
-
-    nonce.value
+    case result
+    when 1 then nonce.value
+    when 0 then nil
+    else raise 'unexpected result'
+    end
   end
 end

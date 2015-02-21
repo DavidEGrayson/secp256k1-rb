@@ -157,7 +157,6 @@ module Secp256k1
       result = @lib.secp256k1_ec_privkey_export(self, seckey.string,
         privkey.pointer, privkey.size_pointer, compressed.to_i)
 
-      # TODO: get libsecp256k1 to document this return value
       case result
       when 0
         nil
@@ -175,7 +174,6 @@ module Secp256k1
       result = @lib.secp256k1_ec_privkey_import(self, seckey.pointer,
         privkey.string, privkey.length)
 
-      # TODO: get libsecp256k1 to document this return vale
       case result
       when 0
         nil
