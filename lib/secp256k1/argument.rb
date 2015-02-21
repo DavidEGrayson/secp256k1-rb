@@ -1,3 +1,6 @@
+# The classes in thie file help us prepare the arguments for the FFI
+# functions in the library we are calling.
+
 require 'ffi'
 
 module Secp256k1
@@ -186,10 +189,12 @@ module Secp256k1
         @func = case noncefp
                 when Proc
                   wrapper_proc(noncefp)
-                when :default, nil
+                when :default
                   ForeignLibrary.secp256k1_nonce_function_default
                 when :rfc6979
                   ForeignLibrary.secp256k1_nonce_function_rfc6979
+                when nil
+                  nil
                 else
                   raise ArgumentError, "invalid noncefp"
                 end

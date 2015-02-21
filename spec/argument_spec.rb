@@ -95,9 +95,9 @@ describe Secp256k1::Argument::NonceFunction do
     expect(arg.func).to eq Secp256k1::ForeignLibrary.secp256k1_nonce_function_default
   end
 
-  it 'converts nil to secp256k1_nonce_function_default also' do
+  it 'converts nil to nil' do
     arg = described_class.new(nil)
-    expect(arg.func).to eq Secp256k1::ForeignLibrary.secp256k1_nonce_function_default
+    expect(arg.func).to eq nil
   end
 
   it 'converts :rfc6979 to secp256k1_nonce_function_rfc6979' do
