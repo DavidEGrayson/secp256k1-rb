@@ -25,11 +25,25 @@ end
 
 describe Secp256k1::Argument::NonceFunction do
   describe 'wrapper proc' do
+    let(:msg32) { msg32 = "\xAA".force_encoding('ASCII-8BIT') * 32 }
+    let(:msg32_ptr) do
+      msg32_ptr = FFI::MemoryPointer.new(:uchar, 32)
+      msg32_ptr.write_string msg32
+    end
+
+    let(:seckey) { seckey = "\xBB".force_encoding('ASCII-8BIT') * 32 }
+
+    let(:seckey_ptr) do
+      seckey_ptr = FFI::MemoryPointer.new(:uchar, 32)
+      seckey_ptr.write_string seckey
+    end
+
     before do
-      @arg_n_proc = nil
       @wrapped_proc_return = nil
       @nonce_buffer = FFI::MemoryPointer.new(:uchar, 32)
-      @proc = Proc.new do |n|
+      @proc = Proc.new do |msg32, seckey, n|
+        @arg_msg32_to_proc = msg32
+        @arg_seckey_to_proc = seckey
         @arg_n_to_proc = n
         @wrapped_proc_return
       end
@@ -44,9 +58,11 @@ describe Secp256k1::Argument::NonceFunction do
       expect(@wrapper_proc.arity).to eq 5
     end
 
-    it 'passes the 4th argument (attempt number) to the wrapped proc' do
-      @wrapper_proc.call(nil, nil, nil, 4, nil)
+    it 'passes the right arguments to the wrapped proc' do
+      @wrapper_proc.call(nil, msg32_ptr, seckey_ptr, 4, nil)
       expect(@arg_n_to_proc).to eq 4
+      expect(@arg_seckey_to_proc).to eq seckey
+      expect(@arg_msg32_to_proc).to eq msg32
     end
 
     context 'when the wrapped proc returns a 32-byte string' do
@@ -55,39 +71,33 @@ describe Secp256k1::Argument::NonceFunction do
       end
 
       it 'returns 1' do
-        result = @wrapper_proc.call(@nonce_buffer, nil, nil, 4, nil)
+        result = @wrapper_proc.call(@nonce_buffer, msg32_ptr, seckey_ptr, 4, nil)
         expect(result).to eq 1
       end
 
       it 'puts the nonce data into the buffer pointed to by the first argument' do
-        result = @wrapper_proc.call(@nonce_buffer, nil, nil, 4, nil)
+        result = @wrapper_proc.call(@nonce_buffer, msg32_ptr, seckey_ptr, 4, nil)
         expect(@nonce_buffer.read_string(32)).to eq @wrapped_proc_return
       end
     end
 
     it 'when the wrapped proc returns nil, returns 0' do
       @wrapped_proc_return = nil
-      result = @wrapper_proc.call(nil, nil, nil, 4, nil)
+      result = @wrapper_proc.call(nil, msg32_ptr, seckey_ptr, 4, nil)
       expect(result).to eq 0
     end
 
     it 'when the wrapped proc returns a bad-length string, returns 0' do
       @wrapped_proc_return = "\x00" * 31
-      expect { @wrapper_proc.call(nil, nil, nil, 4, nil) }
+      expect { @wrapper_proc.call(nil, msg32_ptr, seckey_ptr, 4, nil) }
         .to raise_error 'nonce must be 32 bytes long'
     end
 
     it 'when the wrapped proc returns junk, raises an exception' do
       @wrapped_proc_return = Object.new
-      expect { @wrapper_proc.call(nil, nil, nil, 4, nil) }
+      expect { @wrapper_proc.call(nil, msg32_ptr, seckey_ptr, 4, nil) }
         .to raise_error 'nonce must be a string'
     end
-  end
-
-  it 'accepts procs' do
-    proc = Proc.new { }
-    arg = described_class.new(proc)
-    arg.func.call(nil, nil, nil, 4, nil)
   end
 
   it 'converts :default to secp256k1_nonce_function_default' do

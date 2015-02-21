@@ -203,10 +203,11 @@ module Secp256k1
       private
 
       def wrapper_proc(noncefp)
-        Proc.new do |nonce32, msg32, key32, attempt, data|
-          # TODO: consider passing 3 arguments to the inner proc
-          # so that its interface is the same as Secp256k1.nonce_function_default
-          nonce = noncefp.call(attempt)
+        Proc.new do |nonce32, msg32, seckey, attempt, data|
+          msg32 = msg32.read_string(32)
+          seckey = seckey.read_string(32)
+
+          nonce = noncefp.call(msg32, seckey, attempt)
           case nonce
           when nil
             0
@@ -214,7 +215,7 @@ module Secp256k1
             if nonce.bytesize != 32
               raise 'nonce must be 32 bytes long'
             end
-            nonce32.put_bytes(0, nonce)
+            nonce32.write_string(nonce)
             1
           else
             raise 'nonce must be a string'
