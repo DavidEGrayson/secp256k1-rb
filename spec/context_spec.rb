@@ -270,6 +270,11 @@ describe 'Secp256k1::Context with signing enabled' do
       der = context.ec_privkey_export(ex.seckey, false)
       expect(der).to eq ex.privkey_der_uncompressed
     end
+
+    it 'returns nil if the secret key is zero' do
+      der = context.ec_privkey_export("\x00"*32, false)
+      expect(der).to eq nil
+    end
   end
 end
 
