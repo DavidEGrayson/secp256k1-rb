@@ -47,124 +47,124 @@ module Secp256k1
     seckey_type = :pointer
 
     attach_function :secp256k1_context_create, [
-                      flags_type,
-                    ], ctx_type
+      flags_type,
+    ], ctx_type
 
     attach_function :secp256k1_context_initialize_sign, [
-                      ctx_type,
-                    ], :void
+      ctx_type,
+    ], :void
 
     attach_function :secp256k1_context_initialize_verify, [
-                      ctx_type,
-                    ], :void
+      ctx_type,
+    ], :void
 
     attach_function :secp256k1_context_destroy, [
-                      ctx_type,
-                    ], :void
+      ctx_type,
+    ], :void
 
     attach_function :secp256k1_ecdsa_verify, [
-                      ctx_const_type,
-                      msg32_type,
-                      :buffer_in,
-                      :int,
-                      seckey_const_type,
-                      :int,
-                    ], :int
+      ctx_const_type,
+      msg32_type,
+      :buffer_in,
+      :int,
+      seckey_const_type,
+      :int,
+    ], :int
 
     attach_function :secp256k1_ecdsa_sign, [
-                      ctx_const_type,
-                      msg32_type,
-                      :buffer_out,
-                      :pointer,
-                      seckey_const_type,
-                      :nonce_function,
-                      :pointer,
-                    ], :int
+      ctx_const_type,
+      msg32_type,
+      :buffer_out,
+      :pointer,
+      seckey_const_type,
+      :nonce_function,
+      :pointer,
+    ], :int
 
     attach_function :secp256k1_ecdsa_sign_compact, [
-                      ctx_const_type,
-                      msg32_type,
-                      :pointer,
-                      seckey_const_type,
-                      :nonce_function,
-                      :pointer,
-                      :pointer
-                    ], :int
+      ctx_const_type,
+      msg32_type,
+      :pointer,
+      seckey_const_type,
+      :nonce_function,
+      :pointer,
+      :pointer,
+    ], :int
 
     attach_function :secp256k1_ecdsa_recover_compact, [
-                      ctx_const_type,
-                      msg32_type,
-                      :buffer_in,
-                      :buffer_out,
-                      :pointer,
-                      :int,
-                      :int,
-                    ], :int
+      ctx_const_type,
+      msg32_type,
+      :buffer_in,
+      :buffer_out,
+      :pointer,
+      :int,
+      :int,
+    ], :int
 
     attach_function :secp256k1_ec_seckey_verify, [
-                      ctx_const_type,
-                      seckey_const_type,
-                    ], :int
+      ctx_const_type,
+      seckey_const_type,
+    ], :int
 
     attach_function :secp256k1_ec_pubkey_verify, [
-                      ctx_const_type,
-                      :buffer_in,
-                      :int,
-                    ], :int
+      ctx_const_type,
+      :buffer_in,
+      :int,
+    ], :int
 
     attach_function :secp256k1_ec_pubkey_create, [
-                      ctx_const_type,
-                      :buffer_out,
-                      :pointer,
-                      seckey_const_type,
-                      :int,
-                    ], :int
+      ctx_const_type,
+      :buffer_out,
+      :pointer,
+      seckey_const_type,
+      :int,
+    ], :int
 
     attach_function :secp256k1_ec_pubkey_decompress, [
-                      ctx_const_type,
-                      :buffer_inout,
-                      :pointer,
-                    ], :int
+      ctx_const_type,
+      :buffer_inout,
+      :pointer,
+    ], :int
 
     attach_function :secp256k1_ec_privkey_export, [
-                      ctx_const_type,
-                      seckey_const_type,
-                      :buffer_out,
-                      :pointer,
-                      :int,
-                    ], :int
+      ctx_const_type,
+      seckey_const_type,
+      :buffer_out,
+      :pointer,
+      :int,
+    ], :int
 
     attach_function :secp256k1_ec_privkey_import, [
-                      ctx_const_type,
-                      seckey_type,
-                      :buffer_in,
-                      :int,
-                    ], :int
+      ctx_const_type,
+      seckey_type,
+      :buffer_in,
+      :int,
+    ], :int
 
     attach_function :secp256k1_ec_privkey_tweak_add, [
-                      ctx_const_type,
-                      seckey_type,
-                      :buffer_in,
-                    ], :int
+      ctx_const_type,
+      seckey_type,
+      :buffer_in,
+    ], :int
 
     attach_function :secp256k1_ec_pubkey_tweak_add, [
-                      ctx_const_type,
-                      seckey_type,
-                      :int,
-                      :buffer_in,
-                    ], :int
+      ctx_const_type,
+      seckey_type,
+      :int,
+      :buffer_in,
+    ], :int
 
     attach_function :secp256k1_ec_privkey_tweak_mul, [
-                      ctx_const_type,
-                      :pointer,
-                      :buffer_in,
-                    ], :int
+      ctx_const_type,
+      :pointer,
+      :buffer_in,
+    ], :int
 
     attach_function :secp256k1_ec_pubkey_tweak_mul, [
-                      ctx_const_type,
-                      :pointer,
-                      :int,
-                      :buffer_in
-                    ], :int
+      ctx_const_type,
+      :pointer,
+      :int,
+      :buffer_in,
+    ], :int
   end
 end

@@ -33,3 +33,10 @@ AbcSize:
 
 ClassLength:
   Max: 300
+
+TrailingComma:
+  EnforcedStyleForMultiline: comma
+
+UselessAssignment:
+  Exclude:
+    - 'console'
