@@ -3,6 +3,18 @@ require 'secp256k1/argument'
 
 module Secp256k1
   class Context
+    # Calls `secp256k1_context_create` to create a new context.
+    #
+    # Two options are accepted in an optional hash argument:
+    #
+    # - `:verify` - Set this option to true to initialize this context for signature verification.
+    # - `:sign` - Set this option to true to initialize this context for signing.
+    #
+    # To create a fully-functional context, just do:
+    #
+    #     ecdsa_context = Secp256k1::Context.new(sign: true, verify: true)
+    #
+    # @param opts Hash of options
     def initialize(opts = {})
       @lib = opts.fetch(:lib) { ForeignLibrary }
 
@@ -16,14 +28,44 @@ module Secp256k1
       @ptr = FFI::AutoPointer.new(pointer, destroyer)
     end
 
+    # Calls `secp256k1_context_initialize_sign` to initialize a context for
+    # signing after it was created.
+    #
+    # This method is not reentrant, so be careful to not call this method or
+    # any other `initialize_*` method in two different threads on the same
+    # object at the same time.
+    #
+    # @return nil
     def initialize_sign
       @lib.secp256k1_context_initialize_sign(self)
     end
 
+    # Calls `secp256k1_context_initialize_verify` to initialize a context for
+    # verification after it was created.
+    #
+    # This method is not reentrant, so be careful to not call this method or
+    # any other `initialize_*` method in two different threads on the same
+    # object at the same time.
+    #
+    # @return nil
     def initialize_verify
       @lib.secp256k1_context_initialize_verify(self)
     end
 
+    # Verifies an ECDSA signature by calling `secp256k1_ecdsa_verify`.
+    #
+    # Returns the status code from the native function:
+    #
+    # - 1: correct signature
+    # - 0: incorrect signature
+    # - -1: invalid public key
+    # - -2: invalid signature
+    #
+    # @param msg32 A 32-byte string holding the message hash.
+    # @param sig A string holding the DER-encoded signature.
+    # @param pubkey A string holding the public key.
+    #
+    # @return (Integer)
     def ecdsa_verify(msg32, sig, pubkey)
       msg32 = Argument::MessageHash.new(msg32)
       sig = Argument::SignatureIn.new(sig)
@@ -32,7 +74,28 @@ module Secp256k1
         pubkey.string, pubkey.length)
     end
 
-    def ecdsa_sign(msg32, seckey, noncefp = :default)
+    # Creates an ECDSA signature by calling `secp256k1_ecdsa_sign`.
+    #
+    # Acceptable values for `noncefp` are:
+    #
+    # - nil, which results in passing a null pointer to `secp256k1_ecdsa_sign`.
+    # - `:default`, which results in using `secp256k1_nonce_function_default`.
+    # - `:rfc6979`, which results in using `secp256k1_nonce_function_rfc699`.
+    # - A Proc that takes the same arguments as
+    #   {Secp256k1.nonce_function_default} and returns either a 32-byte nonce
+    #   string or nil.  This option is only recommended for advanced users who
+    #   know what they are doing; badly generated nonces can compromise your
+    #   secret key!
+    #
+    # Note: Choosing `nil` should be equivalent to choosing `:default`, but the
+    # two options do result in different arguments being passed to `libsecp256k1`.
+    #
+    # @param msg32 A 32-byte string holding the message hash.
+    # @param seckey A 32-byte string holding the secret hey.
+    # @param noncefp A specification for how to generate the nonce.
+    # @return Usually returns a string holding the DER-encoded signature, but
+    #   can return nil if the secret key was invalid or nonce generation failed.
+    def ecdsa_sign(msg32, seckey, noncefp = nil)
       msg32 = Argument::MessageHash.new(msg32)
       seckey = Argument::SecretKeyIn.new(seckey)
       noncefp = Argument::NonceFunction.new(noncefp)
@@ -43,17 +106,24 @@ module Secp256k1
 
       case result
       when 0
-        # the nonce generation function failed
         nil
       when 1
-        # signature created
         sig.value
       else
         fail 'unexpected result'
       end
     end
 
-    def ecdsa_sign_compact(msg32, seckey, noncefp = :default)
+    # Creates a compact ECDSA signature (64-byte string and recovery ID) by
+    # calling `secp256k1_ecdsa_sign`.
+    #
+    # The parameters are the same as {Context#ecdsa_sign}'s parameters.
+    #
+    # @return Usually returns an array whose first element is the 64-byte
+    #   signature string and the second element is the recovery ID
+    #   (integer between 0 and 3).
+    #   Returns nil if the secret key was invalid or nonce generation failed.
+    def ecdsa_sign_compact(msg32, seckey, noncefp = nil)
       msg32 = Argument::MessageHash.new(msg32)
       seckey = Argument::SecretKeyIn.new(seckey)
       noncefp = Argument::NonceFunction.new(noncefp)
@@ -66,7 +136,6 @@ module Secp256k1
 
       case result
       when 0
-        # the nonce generation function failed
         nil
       when 1
         # signature created
@@ -76,6 +145,15 @@ module Secp256k1
       end
     end
 
+    # Recover an ECDSA public key from a compact signature by calling
+    # `secp256k1_ecdsa_recover_compact`.
+    #
+    # @param msg32 A 32-byte string holding the message hash.
+    # @param sig64 A 64-byte string holding the compact signature.
+    # @param compressed A boolean indicating whether to output the
+    #   recovered public key in compressed format.
+    # @param recid The recovery ID (integer between 0 and 3, as returned by
+    #   `ecdsa_sign_compact`).
     def ecdsa_recover_compact(msg32, sig64, compressed, recid)
       msg32 = Argument::MessageHash.new(msg32)
       sig64 = Argument::SignatureCompactIn.new(sig64)
@@ -252,6 +330,8 @@ module Secp256k1
     # the future without notice.  This method makes it so we can pass
     # a Context object to FFI and it automatically converts it to a
     # pointer.
+    #
+    # @api private
     def to_ptr
       @ptr
     end

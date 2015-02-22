@@ -1,6 +1,7 @@
 require 'ffi'
 
 module Secp256k1
+  # @api private
   module ForeignLibrary
     extend FFI::Library
 

@@ -4,6 +4,7 @@
 require 'ffi'
 
 module Secp256k1
+  # @api private
   module Argument
     class StringIn
       attr_reader :string
