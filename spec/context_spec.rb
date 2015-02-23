@@ -29,6 +29,17 @@ describe 'Secp256k1::Context unit tests' do
       Secp256k1::Context.new(lib: lib, verify: true)
     end
   end
+
+  it 'has working garbage collection' do
+    # This test is important because if we make a Proc to serve as the destroyer
+    # and the context ends up in the closure of the proc, garbage collection
+    # does not work.
+    Secp256k1::Context.new(lib: lib)
+    before_count = ObjectSpace.each_object(Secp256k1::Context).count
+    GC.start
+    after_count = ObjectSpace.each_object(Secp256k1::Context).count
+    expect(before_count).to be > after_count
+  end
 end
 
 describe 'Secp256k1::Context late initialization for signing' do
