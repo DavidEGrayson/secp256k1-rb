@@ -190,8 +190,6 @@ module Secp256k1
       end
     end
 
-    # TODO: document what initialization the context needs for each method
-
     # Verifies an ECDSA secret key by calling `secp256k1_ec_seckey_verify`.
     #
     # NOTE: For consistency with {Context#ecdsa_verify}, this function returns
