@@ -125,7 +125,7 @@ pubkey = context.ec_pubkey_create(seckey, false)
 
 ## Signing a message
 
-This example shows how to generate a signature for a message.  In this example, we will use SHA-256 as our digest algorithm, but other algorithms can be used, as long as they produce a 32-byte string.
+This example shows how to generate a signature for a message.  In this example, we will use SHA-256 as our digest algorithm.  Other digest algorithms can be used as long as they produce a 32-byte string.
 
 This example assumes that you have required the `secp256k1` library, that you have a `Secp256k1::Context` object named `context`, and that you have the secret key stored in a variable named `seckey`.
 
