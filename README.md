@@ -29,20 +29,20 @@ Until these issues are resolved, the installation instructions below will not wo
 
 If you are using Mac OS X and Homebrew, run these commands to install required development tools:
 
-````
+```
 $ brew install autoconf automake libtool
-````
+```
 
 Then download and install the library:
 
-````
+```
 $ git clone git@github.com:bitcoin/secp256k1.git
 $ cd secp256k1
 $ ./autogen.sh
 $ ./configure
 $ make
 $ sudo make install
-````
+```
 
 Then install the secp256k1 gem:
 
@@ -55,3 +55,37 @@ Or add this line to your Gemfile:
 ````
 gem 'secp256k1'
 ````
+
+## Making a context
+
+After requiring the library, you should create a context.  The context holds precomputed tables of data that are needed later when you are calling other methods in the library.  When creating the context, you can specify what features you need.  To create a fully-functional context, do this:
+
+```ruby
+Secp256k1::Context.new(sign: true, verify: true)
+```
+
+If you call a method that requires a feature that has not been initialized yet in the context object, then libsecp256k1 will abort the entire process.
+
+Creating a context is a relatively expensive operation in terms of time and memory, so you should probably just do it once when you code is loaded, or do it once for each independent module that uses the library.
+
+If you are writing a simple script, you might create a context with a few lines like this at the top of the file.
+
+```ruby
+require 'secp256k1'
+context = Secp256k1::Context.new(sign: true, verify: true)
+# do stuff with contest
+```
+
+If you are writing a library, you might create a context like this:
+
+```ruby
+require 'secp256k1'
+
+class MyClass
+  Context = Secp256k1::Context.new(sign: true, verify: true)
+
+  def your_method
+    # do stuff with Context
+  end
+end
+```
