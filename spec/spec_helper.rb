@@ -3,10 +3,14 @@
 require 'coveralls'
 Coveralls.wear! if Coveralls.will_run?
 
-require 'secp256k1'
-require 'ostruct'
+if ENV['COVERAGE'] == 'Y'
+  require 'simplecov'
+  SimpleCov.start
+end
 
 require_relative 'hex_inspect'
+require 'secp256k1'
+require 'ostruct'
 
 RSpec.configure do |config|
   config.expect_with :rspec do |expectations|
