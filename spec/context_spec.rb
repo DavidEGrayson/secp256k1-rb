@@ -31,15 +31,20 @@ describe 'Secp256k1::Context unit tests' do
   end
 
   it 'has working garbage collection' do
-    # This test is important because if we make a Proc to serve as the destroyer
+    # This test is important because if we make a proc to serve as the destroyer
     # and the context ends up in the closure of the proc, garbage collection
-    # does not work.
-    Secp256k1::Context.new(lib: lib)
-    before_count = ObjectSpace.each_object(Secp256k1::Context).count
+    # does not work.  This test only works on MRI as far as I know.  The
+    # before_proc is necessary to make sure the context object does not get
+    # garbage collected before we take our first object count.
+    before_proc = lambda do
+      a = Secp256k1::Context.new(lib: lib)
+      ObjectSpace.each_object(Secp256k1::Context).count
+    end
+    before_count = before_proc.call
     GC.start
     after_count = ObjectSpace.each_object(Secp256k1::Context).count
     expect(before_count).to be > after_count
-  end
+  end if RUBY_ENGINE == 'ruby'
 end
 
 describe 'Secp256k1::Context late initialization for signing' do
