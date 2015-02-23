@@ -103,8 +103,13 @@ describe 'Secp256k1::Context with nothing enabled' do
   end
 
   describe 'ec_pubkey_decompress' do
-    it 'can decompress a public key' do
+    it 'can decompress a compressed public key' do
       pubkey = context.ec_pubkey_decompress(ExampleSig1.pubkey_compressed)
+      expect(pubkey).to eq ExampleSig1.pubkey_uncompressed
+    end
+
+    it 'can preserve a decompressed public key' do
+      pubkey = context.ec_pubkey_decompress(ExampleSig1.pubkey_uncompressed)
       expect(pubkey).to eq ExampleSig1.pubkey_uncompressed
     end
 

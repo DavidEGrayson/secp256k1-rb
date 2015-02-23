@@ -3,6 +3,8 @@ require 'secp256k1/foreign_library'
 require 'secp256k1/context'
 require 'secp256k1/argument'
 
+# Main module for the gem.
+#
 # @api public
 module Secp256k1
   # Calls the function pointed to by the `secp256k1_nonce_function_default`

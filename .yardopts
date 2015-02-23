@@ -1,2 +1,3 @@
 --markup=markdown
 --api public
+--tag initreq:"Initialization prerequisite"

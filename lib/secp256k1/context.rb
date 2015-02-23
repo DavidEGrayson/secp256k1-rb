@@ -2,6 +2,14 @@ require 'secp256k1/foreign_library'
 require 'secp256k1/argument'
 
 module Secp256k1
+  # A Context object must be created in order to use most parts of libsecp256k1.
+  # The context object holds tables of precomputed data that make the
+  # operation of the library more efficient.
+  #
+  # The way that the context object was initialized determines which features it
+  # supports.  To create a fully-functional context, just do:
+  #
+  #     cont = Secp256k1::Context.new(sign: true, verify: true)
   class Context
     # Calls `secp256k1_context_create` to create a new context.
     #
@@ -12,7 +20,7 @@ module Secp256k1
     #
     # To create a fully-functional context, just do:
     #
-    #     ecdsa_context = Secp256k1::Context.new(sign: true, verify: true)
+    #     cont = Secp256k1::Context.new(sign: true, verify: true)
     #
     # @param opts Hash of options
     def initialize(opts = {})
@@ -64,8 +72,8 @@ module Secp256k1
     # @param msg32 A 32-byte string holding the message hash.
     # @param sig A string holding the DER-encoded signature.
     # @param pubkey A string holding the public key.
-    #
     # @return (Integer)
+    # @initreq verify
     def ecdsa_verify(msg32, sig, pubkey)
       msg32 = Argument::MessageHash.new(msg32)
       sig = Argument::SignatureIn.new(sig)
@@ -95,6 +103,7 @@ module Secp256k1
     # @param noncefp A specification for how to generate the nonce.
     # @return Usually returns a string holding the DER-encoded signature, but
     #   can return nil if the secret key was invalid or nonce generation failed.
+    # @initreq sign
     def ecdsa_sign(msg32, seckey, noncefp = nil)
       msg32 = Argument::MessageHash.new(msg32)
       seckey = Argument::SecretKeyIn.new(seckey)
@@ -123,6 +132,7 @@ module Secp256k1
     #   signature string and the second element is the recovery ID
     #   (integer between 0 and 3).
     #   Returns nil if the secret key was invalid or nonce generation failed.
+    # @initreq sign
     def ecdsa_sign_compact(msg32, seckey, noncefp = nil)
       msg32 = Argument::MessageHash.new(msg32)
       seckey = Argument::SecretKeyIn.new(seckey)
@@ -154,6 +164,7 @@ module Secp256k1
     #   recovered public key in compressed format.
     # @param recid The recovery ID (integer between 0 and 3, as returned by
     #   `ecdsa_sign_compact`).
+    # @initreq verify
     def ecdsa_recover_compact(msg32, sig64, compressed, recid)
       msg32 = Argument::MessageHash.new(msg32)
       sig64 = Argument::SignatureCompactIn.new(sig64)
@@ -179,16 +190,41 @@ module Secp256k1
       end
     end
 
+    # TODO: document what initialization the context needs for each method
+
+    # Verifies an ECDSA secret key by calling `secp256k1_ec_seckey_verify`.
+    #
+    # NOTE: For consistency with {Context#ecdsa_verify}, this function returns
+    # an integer instead of boolean.
+    #
+    # @param seckey A 32-byte string holding the secret key.
+    # @return 1 if the key is valid, 0 if it is invalid.
     def ec_seckey_verify(seckey)
       seckey = Argument::SecretKeyIn.new(seckey)
       @lib.secp256k1_ec_seckey_verify(self, seckey.string)
     end
 
+    # Verifies an ECDSA public key by calling `secp256k1_ec_pubkey_verify`.
+    #
+    # NOTE: For consistency with {Context#ecdsa_verify}, this function returns
+    # an integer instead of boolean.
+    #
+    # @param pubkey A 33-byte or 65-byte string holding the public key.
+    # @return 1 if the key is valid, 0 if it is invalid
     def ec_pubkey_verify(pubkey)
       pubkey = Argument::PublicKeyIn.new(pubkey)
       @lib.secp256k1_ec_pubkey_verify(self, pubkey.string, pubkey.length)
     end
 
+    # Computes the public key for a secret key by calling
+    # `secp256k1_ec_pubkey_create`.
+    #
+    # @param seckey A 32-byte string holding the secret key.
+    # @param compressed A boolean indicating whether to output the public key in
+    #   compressed format.
+    # @return Normally returns a string holding the public key.
+    #   Returns nil if the secret key was invalid.
+    # @initreq sign
     def ec_pubkey_create(seckey, compressed)
       seckey = Argument::SecretKeyIn.new(seckey)
       compressed = Argument::Compressed.new(compressed)
@@ -210,6 +246,11 @@ module Secp256k1
       end
     end
 
+    # Decompresses a public key by calling `secp256k1_ec_pubkey_decompress`.
+    #
+    # @param pubkey A string holding a compressed or decompressed public key.
+    # @return Normally returns a string holding the uncompressed public key.
+    # Returns nil if the passed public key was invalid.
     def ec_pubkey_decompress(pubkey)
       pubkey = Argument::PublicKeyInOutVar.new(pubkey)
 
@@ -227,6 +268,13 @@ module Secp256k1
       end
     end
 
+    # Exports a private key in DER format by calling `secp256k1_ec_privkey_export`.
+    #
+    # @initreq sign
+    # @param seckey A 32-byte string holding the private key.
+    # @param compressed A boolean indicating whether to use a compressed format.
+    # @return A string holding the DER-encoded private key, or nil if
+    #   something went wrong.
     def ec_privkey_export(seckey, compressed)
       seckey = Argument::SecretKeyIn.new(seckey)
       privkey = Argument::PrivateKeyDerOut.new
@@ -245,6 +293,11 @@ module Secp256k1
       end
     end
 
+    # Imports a private key in DER format by calling `secp256k1_ec_privkey_import`.
+    #
+    # @param privkey A string holding the DER-encoded private key.
+    # @return A 32-byte string holding the secret key, or nil if
+    #   something went wrong.
     def ec_privkey_import(privkey)
       privkey = Argument::PrivateKeyDerIn.new(privkey)
       seckey = Argument::SecretKeyOut.new
@@ -262,6 +315,12 @@ module Secp256k1
       end
     end
 
+    # Adds two private keys together by calling `secp256k1_ec_privkey_tweak_add`.
+    #
+    # @param seckey A 32-byte string holding a secret key.
+    # @param tweak A 32-byte string holding a secret key.
+    # @return A 32-byte string holding the secret key that is the sum
+    #   of `seckey` and `tweak`, or nil if something went wrong.
     def ec_privkey_tweak_add(seckey, tweak)
       seckey = Argument::SecretKeyInOut.new(seckey)
       tweak = Argument::SecretKeyIn.new(tweak)
@@ -278,6 +337,14 @@ module Secp256k1
       end
     end
 
+    # Tweaks a public key by adding tweak times the generator to it, by calling
+    # `secp256k1_ec_pubkey_tweak`.
+    #
+    # @param pubkey A string holding a public key.
+    # @param tweak A 32-byte string holding a private key.
+    # @return A string holding the new public key, or nil if something
+    #   went wrong.
+    # @initreq verify
     def ec_pubkey_tweak_add(pubkey, tweak)
       pubkey = Argument::PublicKeyInOutVar.new(pubkey)
       tweak = Argument::SecretKeyIn.new(tweak)
@@ -294,6 +361,12 @@ module Secp256k1
       end
     end
 
+    # Multiplies two private keys together by calling `secp256k1_ec_privkey_tweak_mul`.
+    #
+    # @param seckey A 32-byte string holding a secret key.
+    # @param tweak A 32-byte string holding a secret key.
+    # @return A 32-byte string holding the secret key that is the product
+    #   of `seckey` and `tweak`, or nil if something went wrong.
     def ec_privkey_tweak_mul(seckey, tweak)
       seckey = Argument::SecretKeyInOut.new(seckey)
       tweak = Argument::SecretKeyIn.new(tweak)
@@ -310,6 +383,12 @@ module Secp256k1
       end
     end
 
+    # Multiplies a public key by a private key by calling `secp256k1_ec_pubkey_tweak_mul`.
+    #
+    # @param pubkey A string holding the public key.
+    # @param tweak A 32-byte string holding a secret key.
+    # @return A string holding the new public key, or nil if something went wrong.
+    # @initreq verify
     def ec_pubkey_tweak_mul(pubkey, tweak)
       pubkey = Argument::PublicKeyInOutVar.new(pubkey)
       tweak = Argument::SecretKeyIn.new(tweak)
