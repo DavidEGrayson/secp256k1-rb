@@ -114,6 +114,11 @@ describe Secp256k1::Argument::NonceFunction do
     arg = described_class.new(:rfc6979)
     expect(arg.func).to eq Secp256k1::ForeignLibrary.secp256k1_nonce_function_rfc6979
   end
+
+  it 'raises an ArgumentError if it receives something else' do
+    expect { described_class.new(:abc) }
+      .to raise_error ArgumentError, 'invalid noncefp'
+  end
 end
 
 describe Secp256k1::Argument::NonceOut do
