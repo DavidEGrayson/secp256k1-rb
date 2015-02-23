@@ -1,7 +1,9 @@
 # coding: ascii-8bit
 
-require 'coveralls'
-Coveralls.wear! if Coveralls.will_run?
+if ENV['CI']
+  require 'coveralls'
+  Coveralls.wear!
+end
 
 if ENV['COVERAGE'] == 'Y'
   require 'simplecov'
