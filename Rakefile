@@ -8,3 +8,7 @@ task default: :spec
 task 'to''do' do
   sh 'grep -ni to''do -r --exclude-dir=.git . || echo none'
 end
+
+task 'doc' do
+  sh 'rake'
+end
