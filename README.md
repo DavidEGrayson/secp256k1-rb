@@ -152,4 +152,4 @@ end
 
 ## Supported platforms
 
-This library supports with Ruby (MRI) 1.9.3 and later.  It also supports any Ruby implemenation that is both compatible with one of those MRI versions, and has support for the `ffi` gem.  This includes JRuby, and Rubinius.
+This library supports Ruby (MRI) 1.9.3 and later.  It also supports any Ruby implemenation that is both compatible with one of those MRI versions, and has support for the `ffi` gem.  This includes JRuby, and Rubinius.
