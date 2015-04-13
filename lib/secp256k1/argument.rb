@@ -267,5 +267,23 @@ module Secp256k1
         super compressed, :compressed
       end
     end
+
+    class ExtraEntropy
+      attr_reader :pointer
+
+      def initialize(data)
+        case data
+        when String
+          if data.bytesize != 32
+            fail ArgumentError, 'extra entropy must be 32 bytes long'
+          end
+          @pointer = data
+        when nil
+          # @pointer will be nil
+        else
+          fail ArgumentError, 'extra entropy must be a 32-byte string'
+        end
+      end
+    end
   end
 end

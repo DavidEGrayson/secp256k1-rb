@@ -292,3 +292,27 @@ describe Secp256k1::Argument::VarStringInOut do
     end
   end
 end
+
+describe Secp256k1::Argument::ExtraEntropy do
+  it 'converts nil to nil' do
+    arg = described_class.new(nil)
+    expect(arg.pointer).to eq nil
+  end
+
+  it 'passes a 32-byte string through' do
+    str = 'a' * 32
+    arg = described_class.new(str)
+    expect(arg.pointer).to eq str
+  end
+
+  it 'rejects strings that are the wrong length' do
+    str = 'a' * 31
+    expect { described_class.new(str) }.to raise_error ArgumentError, \
+      'extra entropy must be 32 bytes long'
+  end
+
+  it 'rejects junk' do
+    expect { described_class.new(44) }.to raise_error ArgumentError, \
+      'extra entropy must be a 32-byte string'
+  end
+end
