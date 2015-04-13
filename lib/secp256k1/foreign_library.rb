@@ -51,14 +51,6 @@ module Secp256k1
       flags_type,
     ], ctx_type
 
-    attach_function :secp256k1_context_initialize_sign, [
-      ctx_type,
-    ], :void
-
-    attach_function :secp256k1_context_initialize_verify, [
-      ctx_type,
-    ], :void
-
     attach_function :secp256k1_context_destroy, [
       ctx_type,
     ], :void

@@ -36,30 +36,6 @@ module Secp256k1
       @ptr = FFI::AutoPointer.new(pointer, destroyer)
     end
 
-    # Calls `secp256k1_context_initialize_sign` to initialize a context for
-    # signing after it was created.
-    #
-    # This method is not reentrant, so be careful to not call this method or
-    # any other `initialize_*` method in two different threads on the same
-    # object at the same time.
-    #
-    # @return nil
-    def initialize_sign
-      @lib.secp256k1_context_initialize_sign(self)
-    end
-
-    # Calls `secp256k1_context_initialize_verify` to initialize a context for
-    # verification after it was created.
-    #
-    # This method is not reentrant, so be careful to not call this method or
-    # any other `initialize_*` method in two different threads on the same
-    # object at the same time.
-    #
-    # @return nil
-    def initialize_verify
-      @lib.secp256k1_context_initialize_verify(self)
-    end
-
     # Verifies an ECDSA signature by calling `secp256k1_ecdsa_verify`.
     #
     # Returns the status code from the native function:
