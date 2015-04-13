@@ -39,6 +39,9 @@ module Secp256k1
 
     # Calls `secp256k1_context_clonse` to clone this context.
     #
+    # This method is only here because this wrapper exposes all features of
+    # libsecp256k1.  However, there is generally no reason to use it.
+    #
     # @return (Context) A new context with the same capabilities.
     def context_clone
       clone_ptr = @lib.secp256k1_context_clone(@ptr)
