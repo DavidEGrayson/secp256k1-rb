@@ -20,8 +20,6 @@ Features of this wrapper (which have not all been achieved yet):
 This code is in a transitionary period for a few reasons:
 
 * The `secp256k1` gem from rubygems.org comes from https://github.com/GemHQ/secp256k1-rb, not from the this repository.  That gem does not work with the latest version of libsecp256k1.
-* The code in this repository depends on a [pull request](https://github.com/bitcoin/secp256k1/pull/208) from @sipa to libsecp256k1 which has not been merged in yet, as of 2015-02-06.
-* The code in this repository is not complete yet, and is being developed by @DavidEGrayson.  It will not be considered complete and releasable until all features of the library are exposed and no TODO items are remaining.
 
 Until these issues are resolved, the installation instructions below will not work and you will have to do some futzing to get this code to work.  You can look at `.travis.yml` for some helpful commands to run.
 
