@@ -18,6 +18,6 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'simplecov'
   spec.add_development_dependency 'coveralls'
   spec.add_development_dependency 'ripl'
-  spec.add_development_dependency 'rubocop', '0.29.1'
+  spec.add_development_dependency 'rubocop', '0.30.0'
   spec.add_development_dependency 'yard'
 end
