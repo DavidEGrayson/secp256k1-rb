@@ -13,6 +13,12 @@ describe Secp256k1 do
       nonce = Secp256k1.send(method, ex.message_hash, ex.seckey, 1)
       expect(nonce).to eq ex.nonce_rfc6979_1
     end
+
+    it 'returns the right nonce with extra entropy' do
+      ex = ExampleSig1
+      nonce = Secp256k1.send(method, ex.message_hash, ex.seckey, 0, ex.extra_entropy)
+      expect(nonce).to eq ex.nonce_rfc6979_0_extra_entropy
+    end
   end
 
   describe 'nonce_function_default' do

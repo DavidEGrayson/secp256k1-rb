@@ -1,6 +1,5 @@
 require 'ffi'
 
-# TODO: expose ability to pass extra entropy to the standard nonce functions
 # TODO: expose ability to deep-copy a context
 
 module Secp256k1
