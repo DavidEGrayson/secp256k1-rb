@@ -371,3 +371,22 @@ describe 'Secp256k1::Context with verifying enabled' do
     end
   end
 end
+
+describe 'Secp256k1::Context cloning' do
+  before(:all) do
+    @context1 = Secp256k1::Context.new(verify: true)
+    @context2 = @context1.context_clone
+  end
+
+  specify 'the cloned context has a different pointer' do
+    expect(@context1.instance_variable_get(:@ptr).address).to_not eq \
+      @context2.instance_variable_get(:@ptr).address
+  end
+
+  specify 'the clonsed context is usable' do
+    ex = ExampleSig1
+    result = @context2.ecdsa_verify(ex.message_hash, ex.signature, ex.pubkey)
+    expect(result).to eq 1  # expect correct signature
+  end
+end
+

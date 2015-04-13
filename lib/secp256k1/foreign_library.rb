@@ -53,6 +53,10 @@ module Secp256k1
       flags_type,
     ], ctx_type
 
+    attach_function :secp256k1_context_clone, [
+      ctx_const_type,
+    ], ctx_type
+
     attach_function :secp256k1_context_destroy, [
       ctx_type,
     ], :void

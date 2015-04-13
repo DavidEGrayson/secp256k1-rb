@@ -26,14 +26,23 @@ module Secp256k1
     def initialize(opts = {})
       @lib = opts.fetch(:lib) { ForeignLibrary }
 
-      flags = 0
-      flags |= ForeignLibrary::SECP256K1_START_VERIFY if opts[:verify]
-      flags |= ForeignLibrary::SECP256K1_START_SIGN if opts[:sign]
+      @ptr = opts.fetch(:ptr) do
+        flags = 0
+        flags |= ForeignLibrary::SECP256K1_START_VERIFY if opts[:verify]
+        flags |= ForeignLibrary::SECP256K1_START_SIGN if opts[:sign]
 
-      pointer = @lib.secp256k1_context_create(flags)
+        pointer = @lib.secp256k1_context_create(flags)
+        destroyer = @lib.method(:secp256k1_context_destroy)
+        FFI::AutoPointer.new(pointer, destroyer)
+      end
+    end
 
-      destroyer = @lib.method(:secp256k1_context_destroy)
-      @ptr = FFI::AutoPointer.new(pointer, destroyer)
+    # Calls `secp256k1_context_clonse` to clone this context.
+    #
+    # @return (Context) A new context with the same capabilities.
+    def context_clone
+      clone_ptr = @lib.secp256k1_context_clone(@ptr)
+      self.class.new(lib: @lib, ptr: clone_ptr)
     end
 
     # Verifies an ECDSA signature by calling `secp256k1_ecdsa_verify`.
