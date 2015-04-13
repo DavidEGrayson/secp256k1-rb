@@ -123,6 +123,7 @@ pubkey = context.ec_pubkey_create(seckey, true)
 pubkey = context.ec_pubkey_create(seckey, false)
 ```
 
+
 ## Signing a message
 
 This example shows how to generate a signature for a message.  In this example, we will use SHA-256 as our digest algorithm.  Other digest algorithms can be used as long as they produce a 32-byte string.
@@ -133,10 +134,11 @@ This example assumes that you have required the `secp256k1` library, that you ha
 require 'digest'
 message = 'libsecp256k1 is cool.'
 digest = Digest::SHA256.digest(message)
-signature = context.ecdsa_sign(message, seckey)
+signature = context.ecdsa_sign(digest, seckey)
 ```
 
-For advanced users, there is an optional third argument that controls how to generate the nonce/ephemeral key for the signature.  It is recommended to not specify the third argument, in which case a deterministic nonce-generation algorithm will be used (RFC6979).
+For advanced users, there is an optional third argument that controls how to generate the nonce/ephemeral key for the signature.  It is recommended to not specify the third argument, in which case a deterministic nonce-generation algorithm will be used (RFC 6979).
+
 
 ## Verifying a signature
 
@@ -146,9 +148,10 @@ The code below shows how to verify an ECDSA signature.  It assumes you have stri
 if context.ecdsa_verify(digest, signature, pubkey) == 1
   # signature is valid
 else
-  # signature is not valid
+  # signature is not valid, or some other error
 end
 ```
+
 
 ## Supported platforms
 
