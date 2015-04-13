@@ -389,4 +389,3 @@ describe 'Secp256k1::Context cloning' do
     expect(result).to eq 1  # expect correct signature
   end
 end
-

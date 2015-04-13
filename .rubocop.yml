@@ -39,4 +39,5 @@ TrailingComma:
 
 UselessAssignment:
   Exclude:
-    - 'console'
+    - console
+    - spec/context_spec.rb
